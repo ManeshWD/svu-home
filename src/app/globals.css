@@ -1,0 +1,1791 @@
+@import "tailwindcss";
+
+@theme {
+  --color-deep-navy: #001546;
+  --color-sapphire: #1F45D6;
+  --color-saffron: #FFB21A;
+  --color-vermilion: #D23F12;
+  --color-emerald: #0E8050;
+  --color-sky: #23B5E9;
+  --color-ivory: #FFF9EE;
+  --color-sand: #FFE9C2;
+  --color-slate: #5A6382;
+  --color-ink: #0C1230;
+}
+
+@layer base {
+  :root {
+    --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-serif: var(--font-serif), 'Playfair Display', Georgia, serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: #0C1230;
+    background-color: #FFF9EE;
+  }
+
+  /* Touch-friendly: no grey tap flash, no double-tap zoom delay on controls */
+  a,
+  button,
+  [role="button"],
+  summary {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Phones/tablets: leave room for the floating bottom tab bar (MobileAppShell) */
+  @media (max-width: 1023.98px) {
+    body {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 88px);
+    }
+
+    /* Anchor jumps land below the scroll-up top bar */
+    section[id] {
+      scroll-margin-top: calc(env(safe-area-inset-top) + 64px);
+    }
+  }
+
+  ::selection {
+    background-color: #D23F12;
+    color: #FFFFFF;
+  }
+
+  /* Theme scrollbar — shared by the page and the mega menu overlay so the
+     bar keeps the same width and colours when the menu opens/closes */
+  /* Firefox only — in Chrome, scrollbar-color would override the
+     ::-webkit-scrollbar styles below */
+  @supports not selector(::-webkit-scrollbar) {
+    html,
+    .svu-scroll {
+      scrollbar-color: #FFB21A #001546;
+      scrollbar-width: thin;
+    }
+  }
+
+  html::-webkit-scrollbar,
+  .svu-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  html::-webkit-scrollbar-track,
+  .svu-scroll::-webkit-scrollbar-track {
+    background: #001546;
+  }
+
+  html::-webkit-scrollbar-thumb,
+  .svu-scroll::-webkit-scrollbar-thumb {
+    background: #FFB21A;
+    border: 2px solid #001546;
+    border-radius: 999px;
+  }
+
+  html::-webkit-scrollbar-thumb:hover,
+  .svu-scroll::-webkit-scrollbar-thumb:hover {
+    background: #D23F12;
+  }
+
+  html::-webkit-scrollbar-corner,
+  .svu-scroll::-webkit-scrollbar-corner {
+    background: #001546;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+
+/* ==========================================================================
+   Fan watermark — the SVU star pinned to a section edge so only half shows,
+   spinning continuously like a fan. See FanWatermark.tsx.
+   ========================================================================== */
+.svu-fan-section {
+    position: relative;
+    /* clip (not hidden) so the wrapper never becomes a scroll container */
+    overflow: clip;
+}
+
+.svu-fan-watermark {
+    --fan-size: clamp(240px, 32vw, 520px);
+
+    position: absolute;
+    top: 50%;
+    z-index: 30;
+    width: var(--fan-size);
+    height: var(--fan-size);
+    margin-top: calc(var(--fan-size) / -2);
+    pointer-events: none;
+}
+
+/* Centre sits exactly on the edge — outer half falls outside and is clipped */
+.svu-fan-watermark--left {
+    left: calc(var(--fan-size) / -2);
+}
+.svu-fan-watermark--right {
+    right: calc(var(--fan-size) / -2);
+}
+
+.svu-fan-watermark--light {
+    color: #FFFFFF;
+    opacity: 0.07;
+}
+.svu-fan-watermark--dark {
+    color: #001546;
+    opacity: 0.06;
+}
+
+.svu-fan-watermark svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    animation: svu-fan-spin 18s linear infinite;
+    will-change: transform;
+}
+
+/* Under content instead of over it — e.g. behind the footer's frosted card,
+   stronger so it still reads once the glass blurs it */
+.svu-fan-watermark--behind {
+    z-index: 0;
+}
+.svu-fan-watermark--behind.svu-fan-watermark--dark {
+    color: #1F45D6;
+    opacity: 0.2;
+}
+.svu-fan-watermark--behind.svu-fan-watermark--light {
+    color: #23B5E9;
+    opacity: 0.35;
+}
+
+/* Right-side fans spin the other way so the pair mirrors */
+.svu-fan-watermark--right svg {
+    animation-direction: reverse;
+}
+
+@keyframes svu-fan-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-fan-watermark svg {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   Footer globe → Andhra Pradesh district map (see AndhraMap.tsx).
+   Only transform/opacity animate on the containers so the hand-off from
+   the zooming canvas stays on the compositor at 60fps.
+   ========================================================================== */
+.svu-globe-canvas-wrap {
+    --globe-mask-r: 280px;
+
+    position: absolute;
+    inset: 0;
+    /* Static circular mask: invisible at rest, but softens the sphere's
+       edges into the card once it overflows the canvas during the dive */
+    -webkit-mask-image: radial-gradient(circle at 52% 52%, #000 var(--globe-mask-r), transparent calc(var(--globe-mask-r) * 1.32));
+    mask-image: radial-gradient(circle at 52% 52%, #000 var(--globe-mask-r), transparent calc(var(--globe-mask-r) * 1.32));
+    transform-origin: 50% 50%;
+    transition:
+        opacity 560ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+/* The canvas stops drawing at the hand-off; scaling its last frame carries
+   the dive on at compositor cost while the district map fades in */
+.svu-globe-canvas-wrap.is-hidden {
+    opacity: 0;
+    transform: scale(2.6);
+    pointer-events: none;
+}
+
+.svu-ap-map {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.82);
+    pointer-events: none;
+    transition:
+        opacity 560ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 820ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+}
+.svu-ap-map.is-visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.svu-ap-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 52px 18px 18px;
+    overflow: visible;
+}
+
+.svu-ap-district {
+    fill: #0B2463;
+    stroke: rgba(35, 181, 233, 0.6);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    cursor: pointer;
+    transition: fill 180ms ease, stroke 180ms ease;
+}
+.svu-ap-district:hover {
+    fill: #1F45D6;
+    stroke: #FFB21A;
+}
+.svu-ap-district.is-home {
+    fill: rgba(255, 178, 26, 0.2);
+    stroke: #FFB21A;
+}
+.svu-ap-district.is-home:hover {
+    fill: rgba(255, 178, 26, 0.36);
+}
+
+/* SVU marker — blinking core with two staggered expanding rings */
+.svu-ap-marker {
+    cursor: pointer;
+    outline: none;
+}
+.svu-ap-hit {
+    fill: transparent;
+}
+.svu-ap-core {
+    fill: #FFB21A;
+    stroke: #FFF9EE;
+    stroke-width: 2.5;
+    transform-box: fill-box;
+    transform-origin: center;
+    filter: drop-shadow(0 0 8px rgba(255, 178, 26, 0.9));
+    transition: transform 200ms ease;
+}
+.svu-ap-map.is-settled .svu-ap-core {
+    animation: svu-ap-blink 1.1s ease-in-out infinite;
+}
+.svu-ap-marker:hover .svu-ap-core,
+.svu-ap-marker:focus-visible .svu-ap-core {
+    transform: scale(1.35);
+}
+.svu-ap-ping {
+    fill: none;
+    stroke: #FFB21A;
+    stroke-width: 3;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+}
+.svu-ap-map.is-settled .svu-ap-ping {
+    animation: svu-ap-ping 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+.svu-ap-map.is-settled .svu-ap-ping--late {
+    animation-delay: 0.9s;
+}
+
+.svu-ap-label rect {
+    fill: rgba(0, 21, 70, 0.92);
+    stroke: rgba(255, 178, 26, 0.85);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    transition: fill 200ms ease;
+}
+.svu-ap-marker:hover .svu-ap-label rect,
+.svu-ap-marker:focus-visible .svu-ap-label rect {
+    fill: rgba(31, 69, 214, 0.95);
+}
+.svu-ap-label-title {
+    fill: #FFB21A;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 800;
+}
+.svu-ap-label-sub {
+    fill: rgba(255, 233, 194, 0.88);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+@keyframes svu-ap-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+@keyframes svu-ap-ping {
+    0% { transform: scale(1); opacity: 0.95; }
+    100% { transform: scale(3.6); opacity: 0; }
+}
+
+.svu-ap-tip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(0, 21, 70, 0.94);
+    border: 1px solid rgba(255, 178, 26, 0.6);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 140ms ease;
+    will-change: transform;
+}
+.svu-ap-tip.is-on {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-ap-map.is-settled .svu-ap-core,
+    .svu-ap-map.is-settled .svu-ap-ping {
+        animation: none;
+    }
+    .svu-ap-map,
+    .svu-globe-canvas-wrap {
+        transition-duration: 1ms;
+    }
+}
+
+/* ==========================================================================
+   Notifications — active tab underline doubles as the autoplay loader:
+   starts as a dot, fills to full width, then the next category loads
+   (onAnimationEnd in Notifications.tsx). Paused via animation-play-state.
+   ========================================================================== */
+.svu-notice-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 3px;
+    border-radius: 9999px;
+    background: #FFB21A;
+    animation: svu-notice-fill 7s linear forwards;
+}
+
+@keyframes svu-notice-fill {
+    from { width: 3px; }
+    to { width: 100%; }
+}
+
+/* ==========================================================================
+   FolderFloat — folder that spills draggable question pills (FolderFloat.tsx)
+   --ff-reach reserves the space the open pills need above the folder.
+   ========================================================================== */
+.folder-float {
+  --ff-w: 200px;
+  --ff-h: 148px;
+  --ff-r: 14px;
+  --ff-tab: 14px;
+  --ff-reach: 0px;
+  --ff-back: #3f3f46;
+  --ff-front: #52525b;
+  --ff-paper: #f5f5f5;
+  --ff-item: #f5f5f5;
+  --ff-item-ink: #18181b;
+  --ff-label: #f5f5f5;
+  --ff-spread: 180px;
+  --ff-lift: 26px;
+  --ff-angle: 34deg;
+  --ff-rest: 16deg;
+  --ff-open: 520ms;
+  --ff-close: 312ms;
+  --ff-stagger: 45ms;
+  --ff-n: 6;
+  --ff-spring: cubic-bezier(0.34, 1.57, 0.64, 1);
+  --ff-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  position: relative;
+  display: inline-block;
+  width: var(--ff-w);
+  padding-top: calc(var(--ff-tab) + var(--ff-reach));
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+@media (max-width: 639px) {
+  .folder-float__item,
+  .folder-float[data-open] .folder-float__item {
+    --r: 0deg !important;
+  }
+}
+
+/* Phones: slightly smaller pills so two fit side by side */
+@media (max-width: 639.98px) {
+  .folder-float__item {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
+
+.folder-float__folder {
+  position: relative;
+  width: var(--ff-w);
+  height: var(--ff-h);
+}
+
+.folder-float__back {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--ff-r);
+  background: var(--ff-back);
+  transform: perspective(600px) rotateX(8deg);
+  transform-origin: 50% 100%;
+}
+
+.folder-float__back::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--ff-tab));
+  left: 0;
+  width: 42%;
+  height: calc(var(--ff-tab) + var(--ff-r));
+  border-radius: var(--ff-r) var(--ff-r) 0 0;
+  background: inherit;
+}
+
+.folder-float__paper {
+  position: absolute;
+  top: 10%;
+  z-index: 1;
+  right: 8%;
+  left: 8%;
+  height: 50%;
+  border-radius: 6px;
+  background: var(--ff-paper);
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    transform var(--ff-close) var(--ff-ease-out),
+    opacity var(--ff-close) ease;
+}
+
+.folder-float__front {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 5px;
+  height: 76%;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border-radius: var(--ff-r);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ff-front) 92%, #fff), var(--ff-front) 60%);
+  color: var(--ff-label);
+  box-shadow: 0 -10px 24px rgba(0, 21, 70, 0.28);
+  transform: perspective(600px) rotateX(calc(-1 * var(--ff-rest)));
+  transform-origin: 50% 100%;
+  transition: transform var(--ff-open) var(--ff-ease-out);
+}
+
+.folder-float__label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.folder-float__sub {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.folder-float__trigger {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  height: 76%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ff-r);
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.folder-float__trigger:focus-visible {
+  box-shadow: 0 0 0 3px #FFB21A;
+}
+
+.folder-float[data-open] .folder-float__front {
+  transform: perspective(600px) rotateX(calc(-1 * var(--ff-angle)));
+}
+
+.folder-float[data-open] .folder-float__paper {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    transform var(--ff-open) var(--ff-ease-out),
+    opacity 200ms ease;
+}
+
+.folder-float__items {
+  position: absolute;
+  top: calc(var(--ff-tab) + var(--ff-reach));
+  left: 50%;
+  z-index: 1;
+  width: 0;
+  height: 0;
+}
+
+/* Keeps hover alive while the pointer travels from the folder to the pills */
+.folder-float[data-open] .folder-float__items::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * (var(--ff-reach) + 8px));
+  left: calc(-1 * (var(--ff-spread) + 24px));
+  width: calc(2 * var(--ff-spread) + 48px);
+  height: calc(var(--ff-reach) + 8px);
+}
+
+.folder-float__item {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin: 0;
+  padding: 0 14px;
+  height: 34px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--ff-item);
+  color: var(--ff-item-ink);
+  font: inherit;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 21, 70, 0.18);
+  cursor: pointer;
+  outline: none;
+  opacity: 0;
+  transform: translate(-50%, 44px) scale(0.6);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--ff-close) var(--ff-ease-out) calc((var(--ff-n) - 1 - var(--i)) * var(--ff-stagger) * 0.5),
+    opacity 160ms ease calc((var(--ff-n) - 1 - var(--i)) * var(--ff-stagger) * 0.5 + var(--ff-close) * 0.45),
+    scale 160ms var(--ff-ease-out);
+}
+
+.folder-float__item:focus-visible {
+  box-shadow: 0 0 0 3px #001546;
+}
+
+.folder-float[data-open] .folder-float__item {
+  opacity: 1;
+  transform: translate(calc(-50% + var(--x)), var(--y)) rotate(var(--r)) scale(1);
+  pointer-events: auto;
+  transition:
+    transform var(--ff-open) var(--ff-spring) calc(var(--i) * var(--ff-stagger)),
+    opacity 160ms ease calc(var(--i) * var(--ff-stagger)),
+    scale 160ms var(--ff-ease-out);
+}
+
+.folder-float[data-live] .folder-float__item {
+  cursor: grab;
+  transition: scale 160ms var(--ff-ease-out);
+}
+
+.folder-float__item[data-drag] {
+  cursor: grabbing;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .folder-float[data-open] .folder-float__item:hover {
+    scale: 1.05;
+  }
+}
+
+.folder-float[data-open] .folder-float__item:active {
+  scale: 0.97;
+}
+
+.folder-float__item[data-pop] {
+  animation: folder-float-pop 320ms var(--ff-ease-out);
+}
+
+.folder-float__drift {
+  display: block;
+  animation: folder-float-drift 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.7s);
+  animation-play-state: paused;
+}
+
+.folder-float[data-open] .folder-float__drift {
+  animation-play-state: running;
+}
+
+.folder-float[data-physics] .folder-float__drift,
+.folder-float[data-live] .folder-float__drift {
+  animation: none;
+}
+
+@keyframes folder-float-drift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -3px; }
+}
+
+@keyframes folder-float-pop {
+  30% { scale: 1.1; }
+  100% { scale: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folder-float__front,
+  .folder-float__paper {
+    transition: opacity 200ms ease;
+  }
+  .folder-float[data-open] .folder-float__front {
+    transform: perspective(600px) rotateX(calc(-1 * var(--ff-rest)));
+  }
+  .folder-float__paper {
+    transform: none !important;
+  }
+  .folder-float__item {
+    transition: opacity 200ms ease;
+  }
+  .folder-float[data-open] .folder-float__item {
+    transition: opacity 200ms ease calc(var(--i) * var(--ff-stagger));
+  }
+  .folder-float__drift {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Home2 Footer — shapes that tumble in from above and settle in a
+   messy pile along the bottom edge once the footer enters the viewport.
+   ========================================================================== */
+.svu-footer .svu-drop {
+    /* Set per-shape from the component:
+       --drop-rotate   resting angle once landed
+       --drop-delay    stagger
+       --drop-duration fall time */
+    --drop-rotate: 0deg;
+    --drop-delay: 0ms;
+    --drop-duration: 1100ms;
+
+    opacity: 0;
+    transform: translate3d(0, -120vh, 0) rotate(calc(var(--drop-rotate) - 180deg));
+    will-change: transform, opacity;
+}
+
+.svu-footer .svu-drop.is-landed {
+    animation: svu-drop-in var(--drop-duration) cubic-bezier(0.22, 1.2, 0.36, 1)
+        var(--drop-delay) both;
+}
+
+@keyframes svu-drop-in {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -120vh, 0)
+            rotate(calc(var(--drop-rotate) - 180deg));
+    }
+    12% {
+        opacity: 1;
+    }
+    /* First impact — overshoot slightly into the floor */
+    62% {
+        transform: translate3d(0, 4%, 0)
+            rotate(calc(var(--drop-rotate) + 10deg));
+    }
+    /* Small bounce back up */
+    78% {
+        transform: translate3d(0, -9%, 0)
+            rotate(calc(var(--drop-rotate) - 4deg));
+    }
+    90% {
+        transform: translate3d(0, 2%, 0)
+            rotate(calc(var(--drop-rotate) + 2deg));
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) rotate(var(--drop-rotate));
+    }
+}
+
+/* ==========================================================================
+   Home2 Footer wordmark — outlined type that fills from the side on hover
+   and drains out through its own centre on leave. Phases are set by
+   OutlineWord.tsx via the data-phase attribute.
+   ========================================================================== */
+.svu-outline-word {
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Stroke scales with the type so it stays proportionate at every size */
+    --stroke: clamp(2px, 0.03em, 5px);
+}
+
+.svu-outline-word__stroke {
+    display: block;
+    /* Hollow out the glyphs via text-fill-color, NOT `color: transparent` —
+       `color` has to stay intact or the currentColor stroke below would
+       resolve to transparent as well and the outline would vanish. */
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: var(--stroke) currentColor;
+    paint-order: stroke fill;
+}
+
+.svu-outline-word__fill {
+    position: absolute;
+    inset: 0;
+    display: block;
+    color: currentColor;
+    -webkit-text-fill-color: currentColor;
+    -webkit-text-stroke: 0;
+    white-space: nowrap;
+    pointer-events: none;
+
+    /* idle: empty, anchored to the left edge */
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1900ms cubic-bezier(0.33, 0.68, 0.3, 1);
+}
+
+/* Sweeping in from the left */
+.svu-outline-word[data-phase="filling"] .svu-outline-word__fill {
+    clip-path: inset(0 0 0 0);
+}
+
+/* Draining inward, disappearing at the centre */
+.svu-outline-word[data-phase="emptying"] .svu-outline-word__fill {
+    clip-path: inset(0 50% 0 50%);
+    transition-duration: 950ms;
+    transition-timing-function: cubic-bezier(0.55, 0, 0.5, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-outline-word__fill {
+        transition: none;
+    }
+}
+
+/* ==========================================================================
+   Home2 "Excellence Since 1954" banner — a green gradient trapped inside
+   the card. Positions are driven per frame by HeritageGlow.tsx: each blob
+   crawls in a straight line, reflects off the card's walls and squashes
+   against them. The card's own overflow-hidden does the clipping.
+   ========================================================================== */
+.svu-glow-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+    /* Own stacking context so the blobs' screen blending composites against
+       this layer's gradient rather than the page behind the card */
+    isolation: isolate;
+    /* Deep #040323 midnight floor so the card reads as a cosmic gradient */
+    background:
+        radial-gradient(120% 90% at 78% 82%, rgba(49, 46, 129, 0.55) 0%, rgba(49, 46, 129, 0) 60%),
+        radial-gradient(100% 80% at 12% 10%, rgba(30, 27, 95, 0.5) 0%, rgba(30, 27, 95, 0) 62%),
+        linear-gradient(145deg, #040323 0%, #09073D 48%, #050428 100%);
+}
+
+.svu-glow-blob {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+    /* Additive over the dark ground — blobs brighten where they overlap
+       instead of flatly stacking */
+    mix-blend-mode: screen;
+    will-change: transform;
+    transform: translate(-50%, -50%);
+}
+
+/* Largest body — broad royal indigo wash */
+.svu-glow-blob--a {
+    background: radial-gradient(circle at center,
+            rgba(79, 70, 229, 0.62) 0%,
+            rgba(67, 56, 202, 0.34) 40%,
+            rgba(49, 46, 129, 0) 70%);
+    filter: blur(70px);
+}
+
+/* Electric sapphire / cobalt body */
+.svu-glow-blob--b {
+    background: radial-gradient(circle at center,
+            rgba(37, 99, 235, 0.55) 0%,
+            rgba(29, 78, 216, 0.28) 44%,
+            rgba(30, 58, 138, 0) 72%);
+    filter: blur(64px);
+}
+
+/* Luminous periwinkle body — vibrant celestial accent */
+.svu-glow-blob--c {
+    background: radial-gradient(circle at center,
+            rgba(129, 140, 248, 0.45) 0%,
+            rgba(99, 102, 241, 0.22) 46%,
+            rgba(99, 102, 241, 0) 74%);
+    filter: blur(58px);
+}
+
+/* Bright crystal lavender core — the fastest of the four */
+.svu-glow-blob--d {
+    background: radial-gradient(circle at center,
+            rgba(224, 231, 255, 0.40) 0%,
+            rgba(165, 180, 252, 0.18) 48%,
+            rgba(165, 180, 252, 0) 76%);
+    filter: blur(46px);
+}
+
+/* ==========================================================================
+   Home2 Menu Overlay — shapes zoom in first in the upper space,
+   then plunge down and settle at the bottom!
+   ========================================================================== */
+.menu-shape-drop {
+    opacity: 0;
+    transform: translate3d(0, -22vh, 0) scale(0.25) rotate(var(--drop-rotate, 0deg));
+    will-change: transform, opacity;
+}
+
+.menu-shape-drop.is-dropped {
+    animation: menu-zoom-fall var(--drop-duration, 1000ms) cubic-bezier(0.2, 0.9, 0.3, 1)
+        var(--drop-delay, 0ms) both;
+}
+
+@keyframes menu-zoom-fall {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -22vh, 0) scale(0.25)
+            rotate(calc(var(--drop-rotate, 0deg) - 20deg));
+    }
+    24% {
+        opacity: 1;
+        transform: translate3d(0, -22vh, 0) scale(1.06)
+            rotate(calc(var(--drop-rotate, 0deg) + 5deg));
+    }
+    38% {
+        opacity: 1;
+        transform: translate3d(0, -22vh, 0) scale(1)
+            rotate(var(--drop-rotate, 0deg));
+    }
+    48% {
+        opacity: 1;
+        transform: translate3d(0, -24vh, 0) scale(0.98)
+            rotate(var(--drop-rotate, 0deg));
+    }
+    76% {
+        opacity: 1;
+        transform: translate3d(0, 14px, 0) scale(1.02, 0.97)
+            rotate(calc(var(--drop-rotate, 0deg) + 6deg));
+    }
+    87% {
+        opacity: 1;
+        transform: translate3d(0, -8px, 0) scale(0.99, 1.01)
+            rotate(calc(var(--drop-rotate, 0deg) - 2deg));
+    }
+    95% {
+        opacity: 1;
+        transform: translate3d(0, 2px, 0) scale(1)
+            rotate(calc(var(--drop-rotate, 0deg) + 1deg));
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) rotate(var(--drop-rotate, 0deg));
+    }
+}
+
+@keyframes smoothMenuReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(18px, 0, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.animate-smoothMenu {
+    animation: smoothMenuReveal 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-footer .svu-drop,
+    .svu-footer .svu-drop.is-landed,
+    .menu-shape-drop,
+    .menu-shape-drop.is-dropped {
+        animation: none;
+        opacity: 1;
+        transform: rotate(var(--drop-rotate, 0deg));
+    }
+    .svu-footer .animate-marquee {
+        animation: none;
+    }
+    .svu-glow-blob {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   Circular Orbital Gallery Section — Homepage
+   (ported 1:1 from the EduGulf theme "Capturing EduGulf Moments" section)
+   ========================================================================== */
+.section-gallery-orbit {
+    /* Local theme tokens with SVU Vibrant Palette */
+    --bg: #FFF9EE;
+    --surface: #FFFFFF;
+    --ink: #0C1230;
+    --ink-soft: #5A6382;
+    --accent: #D23F12;
+    --border-soft: rgba(0, 21, 70, 0.12);
+    --ease: cubic-bezier(0.25, 1, 0.5, 1);
+    --gutter: 1rem;
+
+    position: relative;
+    background: var(--bg);
+    color: var(--ink);
+    padding: clamp(40px, 6vw, 84px) 0 0;
+    overflow: hidden;
+}
+
+/* The arc already leaves whitespace at its base — no extra void after it */
+.section-gallery-orbit + section {
+    padding-top: clamp(20px, 3vw, 40px);
+}
+
+.gallery-orbit-glow {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(760px, 92vw);
+    height: min(760px, 92vw);
+    background: radial-gradient(circle at center, rgba(255, 178, 26, 0.18) 0%, rgba(210, 63, 18, 0.08) 45%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(44px);
+    z-index: 1;
+}
+
+.gallery-orbit-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+}
+
+.orbit-stage {
+    /* Large radius = shallow, flat arc that reads as a true half-circle */
+    --orbit-radius: clamp(360px, 42vw, 500px);
+    --card-size: clamp(92px, 8.6vw, 122px);
+    --card-radius: clamp(16px, 1.8vw, 24px);
+    --orbit-speed: 55s;
+    /* How far below the ring's horizontal diameter stays visible */
+    --arc-bottom: 56px;
+
+    position: relative;
+    width: 100%;
+    height: calc(var(--orbit-radius) + var(--card-size) / 2 + var(--arc-bottom));
+    overflow: hidden;
+}
+
+/* Continuous orbital rotation */
+@keyframes orbit-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.orbit-ring {
+    position: absolute;
+    top: calc(var(--orbit-radius) + var(--card-size) / 2 + 12px);
+    left: 50%;
+    width: 0;
+    height: 0;
+    animation: orbit-spin var(--orbit-speed) linear infinite;
+    transform-origin: 0 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.orbit-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--card-size);
+    height: var(--card-size);
+    margin-top: calc(var(--card-size) / -2);
+    margin-left: calc(var(--card-size) / -2);
+    transform: rotate(var(--angle)) translateX(var(--orbit-radius)) rotate(90deg);
+    pointer-events: auto;
+}
+
+.orbit-card-facer,
+.orbit-card-spinner {
+    width: 100%;
+    height: 100%;
+}
+
+/* Stop the arc ONLY while a card itself is hovered/focused */
+.orbit-stage:has(.orbit-card:hover) .orbit-ring,
+.orbit-stage:has(.orbit-card:focus-visible) .orbit-ring {
+    animation-play-state: paused;
+}
+
+.orbit-card {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 12px 30px rgba(17, 20, 28, 0.22), 0 3px 8px rgba(17, 20, 28, 0.12);
+    border: 1px solid var(--border-soft);
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, box-shadow 0.35s ease;
+    cursor: pointer;
+    background: var(--surface);
+    display: block;
+}
+
+.orbit-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.45s ease;
+}
+
+.orbit-card:hover {
+    transform: scale(1.16);
+    border-color: var(--accent);
+    box-shadow: 0 20px 46px rgba(17, 20, 28, 0.32), 0 0 22px rgba(228, 118, 60, 0.4);
+    z-index: 25;
+}
+
+.orbit-card:hover img {
+    transform: scale(1.08);
+}
+
+.orbit-card-tag {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 26px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: linear-gradient(to top, rgba(10, 12, 17, 0.92) 0%, rgba(10, 12, 17, 0.55) 45%, rgba(10, 12, 17, 0) 100%);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+    pointer-events: none;
+}
+
+.orbit-card-tag .tag-title {
+    max-width: 100%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #FFFFFF;
+    letter-spacing: 0.005em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.orbit-card-tag .tag-sub {
+    font-size: 0.56rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.62);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.orbit-card:hover .orbit-card-tag {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Static Center Hub — centred inside the dome */
+.orbit-center-hub {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    top: calc(var(--orbit-radius) * 0.43);
+    z-index: 5;
+    width: min(90vw, calc(var(--orbit-radius) * 0.92));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    pointer-events: auto;
+    padding: clamp(12px, 2vw, 24px);
+}
+
+.orbit-center-hub .section-eyebrow {
+    color: var(--accent);
+    background: rgba(228, 118, 60, 0.14);
+    border: 1px solid rgba(228, 118, 60, 0.28);
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.orbit-hub-title {
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: clamp(1.7rem, 3vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 0 0 12px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.orbit-hub-desc {
+    color: var(--ink-soft);
+    font-size: clamp(0.9rem, 1.1vw, 1.02rem);
+    line-height: 1.6;
+    margin: 0 auto 22px;
+    text-align: center;
+    width: 100%;
+}
+
+.orbit-hub-desc p,
+.orbit-hub-desc * {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.orbit-hub-cta {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.orbit-hub-cta .orbit-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(17, 20, 28, 0.22);
+    transition: transform 0.25s ease, background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.orbit-hub-cta .orbit-btn:hover {
+    background: var(--accent);
+    color: #FFFFFF;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(228, 118, 60, 0.4);
+}
+
+.orbit-hub-cta .orbit-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ==========================================================================
+   Mobile-only cover-flow carousel (desktop keeps the orbit above, untouched)
+   ========================================================================== */
+.gallery-coverflow {
+    display: none;
+}
+
+.gallery-coverflow-head {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+.gallery-coverflow-head .section-eyebrow {
+    color: var(--accent);
+    background: rgba(228, 118, 60, 0.14);
+    border: 1px solid rgba(228, 118, 60, 0.28);
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.gallery-coverflow-title {
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 6.5vw, 2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+.cf-head-btn {
+    margin-top: 2px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(17, 20, 28, 0.22);
+}
+.cf-head-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.cf-stage {
+    position: relative;
+    width: 100%;
+    height: 340px;
+    perspective: 1100px;
+    overflow: hidden;
+}
+
+.cf-track {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+}
+
+.cf-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 190px;
+    height: 250px;
+    margin: -125px 0 0 -95px;
+    padding: 0;
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: 0 18px 40px rgba(17, 20, 28, 0.28);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.5s var(--ease), opacity 0.5s var(--ease), filter 0.5s var(--ease), box-shadow 0.5s var(--ease);
+    will-change: transform, opacity;
+}
+.cf-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1) contrast(0.95) brightness(0.9);
+    transition: filter 0.5s var(--ease);
+}
+
+/* Position slots relative to the active card */
+.cf-card.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 5;
+    transform: translateX(0) translateZ(0) rotateY(0deg) scale(1);
+    box-shadow: 0 26px 60px rgba(17, 20, 28, 0.4), 0 0 0 1px rgba(228, 118, 60, 0.35);
+}
+.cf-card.is-active img {
+    filter: grayscale(0) contrast(1) brightness(1);
+}
+.cf-card.is-prev,
+.cf-card.is-next {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 3;
+}
+.cf-card.is-prev {
+    transform: translateX(-64%) translateZ(-140px) rotateY(38deg) scale(0.86);
+}
+.cf-card.is-next {
+    transform: translateX(64%) translateZ(-140px) rotateY(-38deg) scale(0.86);
+}
+.cf-card.is-prev-2,
+.cf-card.is-next-2 {
+    opacity: 0.5;
+    z-index: 1;
+}
+.cf-card.is-prev-2 {
+    transform: translateX(-112%) translateZ(-280px) rotateY(42deg) scale(0.7);
+}
+.cf-card.is-next-2 {
+    transform: translateX(112%) translateZ(-280px) rotateY(-42deg) scale(0.7);
+}
+
+.cf-card-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 30px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    background: linear-gradient(to top, rgba(10, 12, 17, 0.9), rgba(10, 12, 17, 0));
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+}
+.cf-card.is-active .cf-card-caption {
+    opacity: 1;
+}
+.cf-cap-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #FFFFFF;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.cf-cap-sub {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.cf-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 18px;
+}
+.cf-nav {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 6px 18px rgba(17, 20, 28, 0.16);
+    cursor: pointer;
+    transition: transform 0.2s var(--ease), background-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.cf-nav:hover {
+    background: var(--ink);
+    color: var(--bg);
+}
+.cf-nav svg {
+    width: 18px;
+    height: 18px;
+}
+.cf-prev svg {
+    transform: scaleX(-1);
+}
+.cf-nav:active {
+    transform: scale(0.92);
+}
+
+/* Responsiveness */
+@media (max-width: 900px) {
+    .orbit-stage {
+        --orbit-radius: clamp(300px, 46vw, 400px);
+        --card-size: clamp(66px, 9vw, 86px);
+        --card-radius: 16px;
+        --arc-bottom: 84px;
+    }
+    .orbit-center-hub {
+        top: calc(var(--orbit-radius) * 0.3);
+    }
+}
+
+@media (max-width: 600px) {
+    /* Swap the orbit for the cover-flow carousel */
+    .section-gallery-orbit .orbit-stage,
+    .section-gallery-orbit .gallery-orbit-glow {
+        display: none;
+    }
+    .section-gallery-orbit {
+        padding-bottom: clamp(24px, 6vw, 40px);
+    }
+    .gallery-coverflow {
+        display: block;
+        margin-inline: calc(-1 * var(--gutter));
+    }
+    .gallery-coverflow-head {
+        padding-inline: var(--gutter);
+    }
+    .cf-stage {
+        height: 360px;
+    }
+    .cf-card {
+        width: 210px;
+        height: 272px;
+        margin: -136px 0 0 -105px;
+    }
+    .cf-card.is-prev {
+        transform: translateX(-58%) translateZ(-130px) rotateY(35deg) scale(0.82);
+    }
+    .cf-card.is-next {
+        transform: translateX(58%) translateZ(-130px) rotateY(-35deg) scale(0.82);
+    }
+    .cf-card.is-prev-2 {
+        transform: translateX(-104%) translateZ(-260px) rotateY(40deg) scale(0.64);
+    }
+    .cf-card.is-next-2 {
+        transform: translateX(104%) translateZ(-260px) rotateY(-40deg) scale(0.64);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .orbit-ring {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   Colleges — Liquid Glass Drag Carousel, Sketch Transition & Cursor Puck
+   ========================================================================== */
+.colleges-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overscroll-behavior-x: contain;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.colleges-track::-webkit-scrollbar {
+    display: none;
+}
+.colleges-track img {
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Liquid Glass Cards */
+.liquid-glass-card {
+    position: relative;
+    border-radius: 32px;
+    overflow: hidden;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+    will-change: transform;
+}
+
+/* Glass Specular Sheen across the top edge */
+.liquid-glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.12) 35%, rgba(255, 255, 255, 0.02) 65%, rgba(255, 255, 255, 0.2) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Dark Obsidian Liquid Glass -> SVU Deep Navy */
+.liquid-glass-dark {
+    background: linear-gradient(145deg, rgba(0, 21, 70, 0.94) 0%, rgba(0, 15, 50, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 24px 56px -16px rgba(0, 21, 70, 0.65), inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+}
+
+/* Warm Sand Amber Liquid Glass -> SVU Sand */
+.liquid-glass-sand {
+    background: linear-gradient(145deg, rgba(255, 233, 194, 0.94) 0%, rgba(245, 218, 175, 0.97) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 24px 56px -16px rgba(0, 21, 70, 0.15), inset 0 1px 1px 0 rgba(255, 255, 255, 0.65);
+    color: #0C1230;
+}
+
+/* Zoom In State while User is Dragging */
+.colleges-track.is-dragging .liquid-glass-card {
+    transform: scale(1.035);
+    box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.5), inset 0 1px 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Center Active Card Zoom */
+.liquid-glass-card.is-active {
+    transform: scale(1.02);
+}
+.colleges-track.is-dragging .liquid-glass-card.is-active {
+    transform: scale(1.06);
+}
+
+/* Sketch Outline Filter Styles */
+.sketch-layer-dark {
+    filter: url(#college-sketch-dark) contrast(200%) brightness(140%);
+}
+.sketch-layer-sand {
+    filter: url(#college-sketch-sand) contrast(220%) brightness(105%);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    .colleges-track {
+        scroll-behavior: auto;
+    }
+    .liquid-glass-card {
+        transition: none;
+    }
+}
+
+/* ==========================================================================
+   Squishy Button — Uiverse.io (by FColombati), retinted per section palette
+   via CSS custom properties. Default = dark ink shell / warm cream glass
+   (used on the cream-on-dark gallery section). Modifiers below swap the
+   palette for each section's own colors.
+   ========================================================================== */
+.svu-squish-btn {
+    /* Default = Main Button in Saffron Gold #FFB21A with Deep Navy #001546 text */
+    --sq-shell-rgb: 0, 21, 70;
+    --sq-ink: 0, 15, 50;
+    --sq-highlight: 255, 240, 180;
+    --sq-face-a: #FFB21A;
+    --sq-face-b: #F5A300;
+    --sq-text-a: #001546;
+    --sq-text-b: #001546;
+
+    all: unset;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    position: relative;
+    display: inline-block;
+    border-radius: 100em;
+    background-color: rgba(var(--sq-shell-rgb), 0.85);
+    box-shadow:
+        -0.15em -0.15em 0.15em -0.075em rgba(var(--sq-ink), 0.25),
+        0.0375em 0.0375em 0.0675em 0 rgba(var(--sq-ink), 0.1);
+}
+
+/* Secondary Sapphire variant — #1F45D6 with White text */
+.svu-squish-btn--mono {
+    --sq-shell-rgb: 0, 21, 70;
+    --sq-ink: 0, 15, 50;
+    --sq-highlight: 140, 185, 255;
+    --sq-face-a: #2E56FA;
+    --sq-face-b: #1F45D6;
+    --sq-text-a: #FFFFFF;
+    --sq-text-b: #FFFFFF;
+}
+
+/* Sand / Gold variant — Main button */
+.svu-squish-btn--sand {
+    --sq-shell-rgb: 0, 21, 70;
+    --sq-ink: 0, 15, 50;
+    --sq-highlight: 255, 240, 190;
+    --sq-face-a: #FFB21A;
+    --sq-face-b: #F0A500;
+    --sq-text-a: #001546;
+    --sq-text-b: #001546;
+}
+
+/* Centre variant — Saffron Gold face with Deep Navy text & shell */
+.svu-squish-btn--centre {
+    --sq-shell-rgb: 0, 21, 70;
+    --sq-ink: 0, 15, 50;
+    --sq-highlight: 255, 240, 190;
+    --sq-face-a: #FFB21A;
+    --sq-face-b: #E59C00;
+    --sq-text-a: #001546;
+    --sq-text-b: #001546;
+}
+
+.svu-squish-btn::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    width: calc(100% + 0.3em);
+    height: calc(100% + 0.3em);
+    top: -0.15em;
+    left: -0.15em;
+    border-radius: inherit;
+    background: linear-gradient(-135deg, rgba(var(--sq-ink), 0.5), transparent 20%, transparent 100%);
+    filter: blur(0.0125em);
+    opacity: 0.25;
+    mix-blend-mode: multiply;
+}
+
+.svu-squish-btn .svu-squish-outer {
+    position: relative;
+    z-index: 1;
+    border-radius: inherit;
+    transition: box-shadow 300ms ease;
+    will-change: box-shadow;
+    box-shadow:
+        0 0.05em 0.05em -0.01em rgba(var(--sq-ink), 1),
+        0 0.01em 0.01em -0.01em rgba(var(--sq-ink), 0.5),
+        0.15em 0.3em 0.1em -0.01em rgba(var(--sq-ink), 0.25);
+}
+
+.svu-squish-btn:hover .svu-squish-outer {
+    box-shadow:
+        0 0 0 0 rgba(var(--sq-ink), 1),
+        0 0 0 0 rgba(var(--sq-ink), 0.5),
+        0 0 0 0 rgba(var(--sq-ink), 0.25);
+}
+
+.svu-squish-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.55em;
+    border-radius: inherit;
+    padding: 0.9em 1.7em;
+    background-image: linear-gradient(135deg, var(--sq-face-a) 0%, var(--sq-face-b) 100%);
+    transition: box-shadow 300ms ease, clip-path 250ms ease, background-image 250ms ease, transform 250ms ease;
+    will-change: box-shadow, clip-path, background-image, transform;
+    overflow: clip;
+    clip-path: inset(0 0 0 0 round 100em);
+    box-shadow:
+        0 0 0 0 inset rgba(var(--sq-ink), 0.1),
+        -0.05em -0.05em 0.05em 0 inset rgba(var(--sq-ink), 0.25),
+        0 0 0 0 inset rgba(var(--sq-ink), 0.1),
+        0 0 0.05em 0.2em inset rgba(var(--sq-highlight), 0.35),
+        0.025em 0.05em 0.1em 0 inset rgba(var(--sq-highlight), 1),
+        0.12em 0.12em 0.12em inset rgba(var(--sq-highlight), 0.3),
+        -0.075em -0.25em 0.25em 0.1em inset rgba(var(--sq-ink), 0.2);
+}
+
+.svu-squish-btn:hover .svu-squish-inner {
+    clip-path: inset(clamp(1px, 0.0625em, 2px) clamp(1px, 0.0625em, 2px) clamp(1px, 0.0625em, 2px) clamp(1px, 0.0625em, 2px) round 100em);
+    box-shadow:
+        0.1em 0.15em 0.05em 0 inset rgba(var(--sq-ink), 0.6),
+        -0.025em -0.03em 0.05em 0.025em inset rgba(var(--sq-ink), 0.45),
+        0.25em 0.25em 0.2em 0 inset rgba(var(--sq-ink), 0.4),
+        0 0 0.05em 0.5em inset rgba(var(--sq-highlight), 0.2),
+        0 0 0 0 inset rgba(var(--sq-highlight), 1),
+        0.12em 0.12em 0.12em inset rgba(var(--sq-highlight), 0.3),
+        -0.075em -0.12em 0.2em 0.1em inset rgba(var(--sq-ink), 0.2);
+}
+
+.svu-squish-inner span {
+    position: relative;
+    z-index: 4;
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0);
+    background-image: linear-gradient(135deg, var(--sq-text-a) 0%, var(--sq-text-b) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: transform 250ms ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    will-change: transform;
+    text-shadow: rgba(var(--sq-ink), 0.1) 0 0 0.1em;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.svu-squish-btn:hover .svu-squish-inner span {
+    transform: scale(0.975);
+}
+
+.svu-squish-btn:active .svu-squish-inner {
+    transform: scale(0.975);
+}
+
+/* =========================================================
+   Footer Heartbeat Animation (Realistic lub-dub cardiac rhythm)
+   ========================================================= */
+@keyframes svuHeartbeat {
+    0% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.32);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.22);
+    }
+    70% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.svu-heartbeat {
+    display: inline-block;
+    animation: svuHeartbeat 1.35s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
+}
+
+/* Install card (MobileAppShell): ring around the ✕ fills, then the card closes */
+@keyframes svu-countdown-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
