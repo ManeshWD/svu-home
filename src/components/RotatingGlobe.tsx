@@ -190,7 +190,15 @@ export default function RotatingGlobe() {
     handleResize();
     window.addEventListener("resize", handleResize);
 
+    // Only draw while the globe is (nearly) on screen — the loop parks itself
+    // when scrolled away and the observer below restarts it
+    let onScreen = true;
+
     const render = (now: number) => {
+      if (!onScreen) {
+        animationFrameId = 0;
+        return;
+      }
       animationFrameId = requestAnimationFrame(render);
       pulsePhase += 0.04;
 
@@ -463,6 +471,17 @@ export default function RotatingGlobe() {
 
     animationFrameId = requestAnimationFrame(render);
 
+    const visibility = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen && !animationFrameId) {
+          animationFrameId = requestAnimationFrame(render);
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+    visibility.observe(canvas);
+
     // Pointer controls: drag to rotate, click the pin to zoom into Andhra Pradesh
     const hitPin = (clientX: number, clientY: number) => {
       const hit = pinHitRef.current;
@@ -522,6 +541,7 @@ export default function RotatingGlobe() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      visibility.disconnect();
       window.removeEventListener("resize", handleResize);
       canvas.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);

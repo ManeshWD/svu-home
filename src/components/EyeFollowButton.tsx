@@ -121,12 +121,18 @@ export default function EyeFollowButton({
   // Desktop: follow the cursor
   useEffect(() => {
     if (reduceMotion || !canHover) return;
-    const onMove = (e: PointerEvent) => {
+    // Pointer events can fire far faster than the display refreshes — keep
+    // only the latest position and aim once per frame
+    let raf = 0;
+    let px = 0;
+    let py = 0;
+    const aimAtPointer = () => {
+      raf = 0;
       const el = eyesRef.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
-      const mx = e.clientX - (r.left + r.width / 2);
-      const my = e.clientY - (r.top + r.height / 2);
+      const mx = px - (r.left + r.width / 2);
+      const my = py - (r.top + r.height / 2);
       // Each eye aims from its own centre, like the original
       const aim = (offsetX: number) => {
         const dx = mx - offsetX;
@@ -143,8 +149,16 @@ export default function EyeFollowButton({
       rx.set(rr.x);
       ry.set(rr.y);
     };
+    const onMove = (e: PointerEvent) => {
+      px = e.clientX;
+      py = e.clientY;
+      if (!raf) raf = requestAnimationFrame(aimAtPointer);
+    };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
+    };
   }, [reduceMotion, canHover, maxDistance, eyeSize, eyeGap, lx, ly, rx, ry]);
 
   // Touch: glance around like a real eye — a quick shift to a random

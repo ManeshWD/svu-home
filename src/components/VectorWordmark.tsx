@@ -691,8 +691,11 @@ function OriginkitBaseVectorWordmark(props: VectorWordmarkProps) {
             raf = still ? 0 : requestAnimationFrame(frame)
         }
 
+        // Off-screen the loop parks, like a hidden tab
+        let onScreen = true
+
         const gate = () => {
-            if (running && !document.hidden) {
+            if (running && onScreen && !document.hidden) {
                 if (!raf) {
                     last = 0
                     raf = requestAnimationFrame(frame)
@@ -709,6 +712,15 @@ function OriginkitBaseVectorWordmark(props: VectorWordmarkProps) {
         })
         ro.observe(host)
         document.addEventListener("visibilitychange", gate)
+
+        const io = new IntersectionObserver(
+            ([entry]) => {
+                onScreen = entry.isIntersecting
+                gate()
+            },
+            { rootMargin: "200px 0px" }
+        )
+        io.observe(host)
 
         if (typeof document !== "undefined" && document.fonts) {
             document.fonts.ready.then(
@@ -729,6 +741,7 @@ function OriginkitBaseVectorWordmark(props: VectorWordmarkProps) {
             running = false
             if (raf) cancelAnimationFrame(raf)
             ro.disconnect()
+            io.disconnect()
             host.removeEventListener("pointermove", onMove)
             document.removeEventListener("visibilitychange", gate)
         }

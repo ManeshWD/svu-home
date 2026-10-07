@@ -91,7 +91,12 @@ export default function AndhraMap({ visible, focusOnShow, onBack }: AndhraMapPro
               key={d.name}
               d={d.d}
               className={`svu-ap-district ${d.name === ap.svu.district ? "is-home" : ""}`}
-              onPointerEnter={() => setHovered(d.name)}
+              onPointerEnter={(e) => {
+                // Place the tip before showing it — entering without a move
+                // (map scaling in under a still cursor) would leave it at 0,0
+                moveTip(e);
+                setHovered(d.name);
+              }}
             >
               <title>{d.name}</title>
             </path>

@@ -157,16 +157,30 @@ export default function Colleges() {
     setDragOffset(0);
   }, []);
 
-  /* ------------------------------------------------ 3-Second Carousel Auto-Slide */
+  // Auto-slide only while the carousel is on screen — off-screen slides would
+  // just restyle the glass cards for nobody
+  const [onScreen, setOnScreen] = useState(true);
   useEffect(() => {
-    if (isPaused || isDragging) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
-    const timer = setInterval(() => {
+  /* ------------------------------------------------ 3-Second Carousel Auto-Slide */
+  // A one-shot timer re-armed on every slide change, so a manual move (arrows,
+  // swipe) always gets a full 3 s before autoplay advances again — a free-running
+  // interval could fire right after a click and undo it
+  useEffect(() => {
+    if (isPaused || isDragging || !onScreen) return;
+
+    const timer = setTimeout(() => {
       setActive((prev) => (prev + 1) % colleges.length);
     }, 3000);
 
-    return () => clearInterval(timer);
-  }, [isPaused, isDragging]);
+    return () => clearTimeout(timer);
+  }, [active, isPaused, isDragging, onScreen]);
 
   /* ------------------------------------------------ 1-to-1 Mouse/Touch Pointer Dragging */
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {

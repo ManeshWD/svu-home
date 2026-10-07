@@ -73,7 +73,6 @@ export default function Leadership() {
                           fill
                           unoptimized
                           className="object-cover object-top"
-                          priority
                         />
                       </div>
                     )}
@@ -157,7 +156,6 @@ export default function Leadership() {
                   fill
                   unoptimized
                   className="object-cover object-top"
-                  priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#001546]/85 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 flex flex-col text-white">

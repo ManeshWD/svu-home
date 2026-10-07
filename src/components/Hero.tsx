@@ -446,55 +446,26 @@ export default function Hero() {
     };
   }, [isMegaMenuOpen, expandedSubItem]);
 
-  // Animated typing words for the university hero
-  const dynamicWords = [
-    "education",
-    "research",
-    "innovation",
-    "excellence",
-    "leadership",
-  ];
-  const [wordIndex, setWordIndex] = useState(0);
-  const [currentText, setCurrentText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Typing animation effect
+  // Autoplay video setup — while muted, decoding pauses when the hero is
+  // scrolled out of view (nothing visible changes) and resumes as it comes
+  // back; unmuted playback keeps going so the audio isn't cut off
   useEffect(() => {
-    const targetWord = dynamicWords[wordIndex];
-    let timeoutId: NodeJS.Timeout;
-
-    if (isDeleting) {
-      if (currentText.length > 0) {
-        timeoutId = setTimeout(() => {
-          setCurrentText(targetWord.substring(0, currentText.length - 1));
-        }, 50);
-      } else {
-        setIsDeleting(false);
-        setWordIndex((prev) => (prev + 1) % dynamicWords.length);
-        timeoutId = setTimeout(() => {}, 300);
-      }
-    } else {
-      if (currentText.length < targetWord.length) {
-        timeoutId = setTimeout(() => {
-          setCurrentText(targetWord.substring(0, currentText.length + 1));
-        }, 110);
-      } else {
-        timeoutId = setTimeout(() => {
-          setIsDeleting(true);
-        }, 2200);
-      }
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [currentText, isDeleting, wordIndex]);
-
-  // Autoplay video setup
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch((err) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const play = () =>
+      video.play().catch((err) => {
         console.log("Autoplay waiting for user gesture:", err);
       });
-    }
+    play();
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (video.paused) play();
+      } else if (!video.paused && video.muted) {
+        video.pause();
+      }
+    });
+    io.observe(video);
+    return () => io.disconnect();
   }, []);
 
   const toggleSound = () => {
@@ -637,9 +608,7 @@ export default function Hero() {
               World-class, modern
               <span className="block mt-1 sm:mt-1.5 text-white">
                 university{" "}
-                <span className="capitalize text-[#FFB21A] underline decoration-[#FFB21A]/40 underline-offset-4">
-                  {currentText}
-                </span>
+                <TypingWord />
                 <span className="inline-block w-[2.5px] h-[0.8em] bg-[#FFB21A] ml-1 animate-pulse align-middle" />
               </span>
             </h1>
@@ -723,6 +692,60 @@ export default function Hero() {
 
       </div>
     </section>
+  );
+}
+
+// Animated typing words for the university hero
+const DYNAMIC_WORDS = [
+  "education",
+  "research",
+  "innovation",
+  "excellence",
+  "leadership",
+];
+
+/**
+ * Typing animation — its own component so each keystroke re-renders only
+ * this span, not the whole hero (navbars, mega menu, video card)
+ */
+function TypingWord() {
+  const [wordIndex, setWordIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const targetWord = DYNAMIC_WORDS[wordIndex];
+    let timeoutId: NodeJS.Timeout;
+
+    if (isDeleting) {
+      if (currentText.length > 0) {
+        timeoutId = setTimeout(() => {
+          setCurrentText(targetWord.substring(0, currentText.length - 1));
+        }, 50);
+      } else {
+        setIsDeleting(false);
+        setWordIndex((prev) => (prev + 1) % DYNAMIC_WORDS.length);
+        timeoutId = setTimeout(() => {}, 300);
+      }
+    } else {
+      if (currentText.length < targetWord.length) {
+        timeoutId = setTimeout(() => {
+          setCurrentText(targetWord.substring(0, currentText.length + 1));
+        }, 110);
+      } else {
+        timeoutId = setTimeout(() => {
+          setIsDeleting(true);
+        }, 2200);
+      }
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [currentText, isDeleting, wordIndex]);
+
+  return (
+    <span className="capitalize text-[#FFB21A] underline decoration-[#FFB21A]/40 underline-offset-4">
+      {currentText}
+    </span>
   );
 }
 

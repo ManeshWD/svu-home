@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import WithFanWatermark from "@/components/FanWatermark";
 import GoToTopSling from "@/components/GoToTopSling";
 import QuickAccess from "@/components/mobile/QuickAccess";
+import PauseOffscreenAnimations from "@/components/PauseOffscreenAnimations";
 
 export default function Home() {
   return (
@@ -88,6 +89,9 @@ export default function Home() {
 
       {/* Slingshot Go-To-Top Button */}
       <GoToTopSling />
+
+      {/* Rests endless animations in sections scrolled out of view */}
+      <PauseOffscreenAnimations />
     </div>
   );
 }

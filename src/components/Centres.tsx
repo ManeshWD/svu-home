@@ -103,14 +103,13 @@ const SpringCard = ({
             </div>
 
             {/* Top-Right Circular Rotating Text (Learned from Hover.dev Spring Cards) */}
-            <motion.svg
-              initial={{ rotate: 0 }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 25, repeat: Infinity, repeatType: "loop", ease: "linear" }}
-              style={{ top: "0", right: "0", x: "50%", y: "-50%", scale: 0.75 }}
+            {/* Spun by a CSS keyframe (svu-spring-card-spin) so it runs on the
+                compositor instead of a per-frame JS loop */}
+            <svg
+              style={{ top: "0", right: "0" }}
               width="200"
               height="200"
-              className="pointer-events-none absolute z-10 rounded-full"
+              className="svu-spring-card-spin pointer-events-none absolute z-10 rounded-full"
             >
               <path
                 id={`circlePath-${id}`}
@@ -126,7 +125,7 @@ const SpringCard = ({
                   LEARN MORE • LEARN MORE • LEARN MORE • LEARN MORE •
                 </textPath>
               </text>
-            </motion.svg>
+            </svg>
           </motion.div>
         </motion.div>
       </motion.div>

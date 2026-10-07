@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -270,7 +269,8 @@ export default function RotatingGallery() {
                           }
                         }}
                       >
-                        <img src={item.image} alt={item.title} loading="lazy" />
+                        {/* Served at card size (≤ ~150px incl. hover zoom), not the 1024px source */}
+                        <Image src={item.image} alt={item.title} fill sizes="160px" />
                         <div className="orbit-card-tag" aria-hidden="true">
                           <span className="tag-title">{item.title}</span>
                           <span className="tag-sub">{item.category}</span>
@@ -329,7 +329,7 @@ export default function RotatingGallery() {
                       else setSelectedGallery(item);
                     }}
                   >
-                    <img src={item.image} alt={item.title} loading="lazy" />
+                    <Image src={item.image} alt={item.title} fill sizes="210px" />
                     <span className="cf-card-caption">
                       <span className="cf-cap-title">{item.title}</span>
                       <span className="cf-cap-sub">{item.category}</span>
@@ -369,6 +369,7 @@ export default function RotatingGallery() {
                 src={selectedGallery.image}
                 alt={selectedGallery.title}
                 fill
+                sizes="(max-width: 896px) 100vw, 896px"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#001546] via-transparent to-black/30" />

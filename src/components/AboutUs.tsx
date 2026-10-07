@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useInView } from "motion/react";
 import SquishyButton from "./SquishyButton";
 
 const cards = [
@@ -9,6 +11,7 @@ const cards = [
     badge: "Campus",
     src: "/hero-svu-2.webp",
     alt: "Sri Venkateswara University campus",
+    href: "#about", // TODO: Campus page URL
     rotate: -6,
     className: "mt-10",
   },
@@ -16,6 +19,7 @@ const cards = [
     badge: "Administration",
     src: "/about_real_admin.webp",
     alt: "Sri Venkateswara University administrative building",
+    href: "#about", // TODO: Administration page URL
     rotate: 0,
     className: "z-10 -mx-4 sm:-mx-6",
   },
@@ -23,6 +27,7 @@ const cards = [
     badge: "Library",
     src: "/about_real_library.webp",
     alt: "The Sri Venkateswara University library",
+    href: "#about", // TODO: Library page URL
     rotate: 6,
     className: "mt-10",
   },
@@ -52,7 +57,30 @@ const stats = [
   },
 ];
 
+const learnMore = (
+  <SquishyButton variant="sand" href="#colleges">
+    Learn More
+    <svg
+      className="h-3.5 w-3.5 text-[#001546]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h13M12 5l7 7-7 7" />
+    </svg>
+  </SquishyButton>
+);
+
 export default function AboutUs() {
+  const cardsRef = useRef<HTMLDivElement>(null);
+  // Re-evaluated both ways, so the cards tuck away whenever the row scrolls
+  // out (up or down) and fan out again when it returns
+  const inView = useInView(cardsRef, { amount: 0.5 });
+  const [linedUp, setLinedUp] = useState(false);
+
   return (
     <section id="about" className="bg-[#FFF9EE] px-6 py-[clamp(2.5rem,6vh,4.5rem)] lg:px-12 border-b border-[#FFE9C2]/60">
       <div className="mx-auto max-w-7xl">
@@ -76,35 +104,65 @@ export default function AboutUs() {
           1954 — open to every learner, whatever they are starting from.
         </p>
 
-        {/* Overlapping photo cards */}
-        <div className="mt-8 flex items-start justify-center gap-0 sm:gap-2">
-          {cards.map((card) => (
-            <div
-              key={card.badge}
-              style={{ transform: `rotate(${card.rotate}deg)` }}
-              className={`relative aspect-[3/4] w-[33%] max-w-[145px] overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-[#001546]/10 transition-transform duration-300 hover:-translate-y-2 sm:w-[28%] sm:max-w-[170px] lg:max-w-[200px] ${card.className}`}
-            >
-              <Image
-                src={card.src}
-                alt={card.alt}
-                fill
-                sizes="(max-width: 640px) 35vw, 200px"
-                className="object-cover"
-              />
-              <span className="absolute left-1/2 top-2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/95 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.16em] text-[#001546] shadow-md backdrop-blur-sm sm:top-4 sm:px-3 sm:py-1.5 sm:text-[9px]">
-                <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#0E8050] align-middle" />
-                {card.badge}
-              </span>
-            </div>
-          ))}
+        {/* Overlapping photo cards. The side cards sit tucked behind the
+            centre one, fan out while the row is in view and tuck back once
+            it scrolls away; hovering lines all three up side by side.
+            Pure CSS transform transitions — compositor-run, no per-frame JS. */}
+        <div
+          ref={cardsRef}
+          className="mx-auto mt-8 flex max-w-[720px] items-start justify-center gap-0 sm:gap-2"
+          onPointerEnter={(e) => {
+            if (e.pointerType !== "touch") setLinedUp(true);
+          }}
+          onPointerLeave={() => setLinedUp(false)}
+        >
+          {cards.map((card, i) => {
+            // -1 = left, 0 = centre, 1 = right
+            const side = i - 1;
+            // Same function list in every state so each part interpolates cleanly
+            const transform =
+              side === 0 || (inView && !linedUp)
+                ? `translate(0px, 0px) rotate(${card.rotate}deg) scale(1)`
+                : inView
+                  ? // Side by side: undo the overlap plus a small gap, lift to the centre card's top
+                    `translate(${side * 28}px, -40px) rotate(0deg) scale(1)`
+                  : // Behind the centre card
+                    `translate(${-side * 90}%, -40px) rotate(0deg) scale(0.9)`;
+            return (
+              <div
+                key={card.badge}
+                style={{ transform }}
+                className={`relative w-[33%] max-w-[145px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform motion-reduce:transition-none sm:w-[28%] sm:max-w-[170px] lg:max-w-[200px] ${card.className}`}
+              >
+                <Link
+                  href={card.href}
+                  aria-label={card.badge}
+                  className="relative block aspect-[3/4] w-full overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-[#001546]/10 outline-none transition-transform duration-300 hover:-translate-y-2 focus-visible:ring-2 focus-visible:ring-[#D23F12]"
+                >
+                  <Image
+                    src={card.src}
+                    alt={card.alt}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                  <span className="absolute left-1/2 top-2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/95 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.16em] text-[#001546] shadow-md backdrop-blur-sm sm:top-4 sm:px-3 sm:py-1.5 sm:text-[9px]">
+                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#0E8050] align-middle" />
+                    {card.badge}
+                  </span>
+                </Link>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Stats */}
-        <div className="mt-8 grid grid-cols-1 gap-6 border-t border-[#FFE9C2] pt-6 sm:grid-cols-3 sm:gap-0">
+        {/* Stats — phones: 2×2, left-aligned, Learn More in the 4th cell;
+            sm and up: three centred columns with the button below */}
+        <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-7 border-t border-[#FFE9C2] pt-6 sm:grid-cols-3 sm:gap-0">
           {stats.map((stat, i) => (
             <div
               key={stat.label}
-              className={`px-0 text-center sm:px-8 ${
+              className={`px-0 text-left sm:px-8 sm:text-center ${
                 i > 0 ? "sm:border-l sm:border-[#FFE9C2]" : ""
               }`}
             >
@@ -118,30 +176,18 @@ export default function AboutUs() {
                   {stat.accent}
                 </em>
               </p>
-              <p className="mx-auto mt-2 max-w-[16rem] text-[clamp(0.65rem,0.9vw,0.75rem)] leading-relaxed text-[#5A6382]">
+              <p className="mt-2 max-w-[16rem] text-[clamp(0.65rem,0.9vw,0.75rem)] leading-relaxed text-[#5A6382] sm:mx-auto">
                 {stat.body}
               </p>
             </div>
           ))}
+
+          {/* Phones: the button fills the empty 4th grid cell */}
+          <div className="flex items-center sm:hidden">{learnMore}</div>
         </div>
 
-        {/* Learn more pill */}
-        <div className="mt-8 flex justify-center">
-          <SquishyButton variant="sand" href="#colleges">
-            Learn More
-            <svg
-              className="h-3.5 w-3.5 text-[#001546]"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h13M12 5l7 7-7 7" />
-            </svg>
-          </SquishyButton>
-        </div>
+        {/* Learn more pill (sm and up) */}
+        <div className="mt-8 hidden justify-center sm:flex">{learnMore}</div>
       </div>
     </section>
   );

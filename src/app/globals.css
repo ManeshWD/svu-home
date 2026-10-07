@@ -198,6 +198,36 @@
     }
 }
 
+/* Centres spring cards — rotating "LEARN MORE" ring (Centres.tsx). Same
+   transform the motion component produced, but run on the compositor. */
+.svu-spring-card-spin {
+    transform: translate(50%, -50%) scale(0.75) rotate(0deg);
+    animation: svu-spring-card-spin 25s linear infinite;
+}
+
+@keyframes svu-spring-card-spin {
+    from { transform: translate(50%, -50%) scale(0.75) rotate(0deg); }
+    to { transform: translate(50%, -50%) scale(0.75) rotate(360deg); }
+}
+
+/* ==========================================================================
+   Off-screen pause — PauseOffscreenAnimations.tsx marks sections scrolled
+   well out of view with [data-offscreen]; their endless loops freeze there
+   (nobody can see them) and pick up again before they scroll back in.
+   ========================================================================== */
+[data-offscreen] :is(
+    .svu-fan-watermark svg,
+    .animate-marquee,
+    .animate-pulse,
+    .orbit-ring,
+    .svu-heartbeat,
+    .svu-spring-card-spin,
+    .svu-ap-core,
+    .svu-ap-ping
+) {
+    animation-play-state: paused !important;
+}
+
 /* ==========================================================================
    Footer globe → Andhra Pradesh district map (see AndhraMap.tsx).
    Only transform/opacity animate on the containers so the hand-off from
