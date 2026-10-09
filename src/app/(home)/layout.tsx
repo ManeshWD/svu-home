@@ -1,23 +1,23 @@
+import Script from "next/script";
 import type { Metadata, Viewport } from "next";
+import PageTransition from "@/components/v2/PageTransition";
 import MobileAppShell from "@/components/mobile/MobileAppShell";
-import { Plus_Jakarta_Sans, Inter, Playfair_Display } from "next/font/google";
+import GoToTopSling from "@/components/GoToTopSling";
+import { Libre_Baskerville, Lato } from "next/font/google";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
+// Titles: Libre Baskerville (--font-serif, and --font-heading via globals.css)
+const baskerville = Libre_Baskerville({
   variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: "variable",
+});
+
+// Body text: Lato
+const lato = Lato({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["300", "400", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -52,18 +52,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${inter.variable} ${playfair.variable} scroll-smooth`}>
-      <body className="font-sans antialiased text-[#0C1230] bg-[#FFF9EE] selection:bg-[#D23F12] selection:text-white">
+    <html lang="en" className={`${baskerville.variable} ${lato.variable} scroll-smooth`} suppressHydrationWarning>
+      {/* Phones/tablets: navy so the strip reserved under the content for the
+          bottom tab bar continues the footer (pages paint their own ivory) */}
+      <body
+        className="font-sans antialiased text-[#0C1230] bg-[#001546] lg:bg-[#FFF9EE] selection:bg-[#D23F12] selection:text-white"
+        suppressHydrationWarning
+      >
         {/* Capture Chrome's install prompt before React hydrates — it can fire
             early, and a missed event means the Install button can't install */}
-        <script
+        <Script
+          id="svu-pwa-install-prompt"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html:
               "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__svuInstallPrompt=e;window.dispatchEvent(new Event('svu:install-ready'));});",
           }}
         />
+        <PageTransition />
         {children}
         <MobileAppShell />
+        <GoToTopSling />
       </body>
     </html>
   );

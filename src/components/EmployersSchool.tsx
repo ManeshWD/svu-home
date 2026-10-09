@@ -119,7 +119,7 @@ export default function EmployersSchool() {
           <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-[#23B5E9] mb-2">
             Career Opportunities
           </span>
-          <h2 className="text-[clamp(1.5rem,4vw,2.75rem)] font-black text-white tracking-tight font-['Plus_Jakarta_Sans',sans-serif]">
+          <h2 className="text-[clamp(1.5rem,4vw,2.75rem)] font-black text-white tracking-tight font-[family-name:var(--font-heading)]">
             Employers are hiring at your school
           </h2>
           <p className="mt-3 text-[clamp(0.85rem,1.2vw,1.1rem)] text-[#FFE9C2]/85 max-w-2xl mx-auto font-normal leading-relaxed">

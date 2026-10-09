@@ -31,7 +31,7 @@ export default function NoExperience() {
             <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-[#D23F12] mb-2">
               Early Career
             </span>
-            <h2 className="text-[clamp(1.5rem,3.6vw,2.75rem)] font-black text-[#0C1230] tracking-tight leading-[1.1] font-['Plus_Jakarta_Sans',sans-serif]">
+            <h2 className="text-[clamp(1.5rem,3.6vw,2.75rem)] font-black text-[#0C1230] tracking-tight leading-[1.1] font-[family-name:var(--font-heading)]">
               No experience<br />
               needed
             </h2>

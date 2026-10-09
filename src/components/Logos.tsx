@@ -5,14 +5,14 @@ export function SvuLogo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
       <Image
-        src="/SV-logo.webp"
+        src="/SV-logo.webp" unoptimized
         alt="Sri Venkateswara University emblem"
         width={64}
         height={64}
         priority
         className="h-14 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
       />
-      <span className="max-w-[9rem] text-base font-black uppercase leading-tight tracking-tight text-gray-950 sm:max-w-none sm:text-lg font-['Plus_Jakarta_Sans',sans-serif]">
+      <span className="max-w-[9rem] text-base font-black uppercase leading-tight tracking-tight text-gray-950 sm:max-w-none sm:text-lg font-[family-name:var(--font-heading)]">
         Sri Venkateswara University
       </span>
     </div>
@@ -31,7 +31,7 @@ export function HandshakeLogo({ className = "h-8" }: { className?: string }) {
           <path d="M17 8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1Z" />
         </svg>
       </div>
-      <span className="text-2xl font-black tracking-tight text-gray-950 font-['Plus_Jakarta_Sans',sans-serif]">
+      <span className="text-2xl font-black tracking-tight text-gray-950 font-[family-name:var(--font-heading)]">
         Handshake
       </span>
     </div>
@@ -46,7 +46,7 @@ export function AmazonLogo({ className = "h-7" }: { className?: string }) {
         <text
           x="10"
           y="32"
-          fontFamily="'Plus Jakarta Sans', system-ui, sans-serif"
+          fontFamily="'Libre Baskerville', Georgia, serif"
           fontWeight="700"
           fontSize="30"
           fill="#111827"

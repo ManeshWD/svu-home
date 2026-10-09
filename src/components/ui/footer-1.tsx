@@ -82,7 +82,7 @@ export function Footer1({
               <Link href="/home2" className="inline-flex items-center gap-3.5 group select-none">
                 <div className="relative transition-transform duration-300 group-hover:scale-105">
                   <Image
-                    src="/SV-logo.webp"
+                    src="/SV-logo.webp" unoptimized
                     alt={`${brandName} Emblem`}
                     width={48}
                     height={48}

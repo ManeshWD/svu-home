@@ -4,22 +4,23 @@ import React, { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useInView } from "motion/react";
-import SquishyButton from "./SquishyButton";
+import { ArrowRight } from "lucide-react";
+import PixelButton from "./PixelButton";
 
 const cards = [
   {
     badge: "Campus",
     src: "/hero-svu-2.webp",
     alt: "Sri Venkateswara University campus",
-    href: "#about", // TODO: Campus page URL
+    href: "/about",
     rotate: -6,
-    className: "mt-10",
+    className: "mt-10 lg:mt-[calc(40*var(--dk-space))]",
   },
   {
     badge: "Administration",
     src: "/about_real_admin.webp",
     alt: "Sri Venkateswara University administrative building",
-    href: "#about", // TODO: Administration page URL
+    href: "/administration/vice-chancellor",
     rotate: 0,
     className: "z-10 -mx-4 sm:-mx-6",
   },
@@ -27,9 +28,9 @@ const cards = [
     badge: "Library",
     src: "/about_real_library.webp",
     alt: "The Sri Venkateswara University library",
-    href: "#about", // TODO: Library page URL
+    href: "/about",
     rotate: 6,
-    className: "mt-10",
+    className: "mt-10 lg:mt-[calc(40*var(--dk-space))]",
   },
 ];
 
@@ -58,20 +59,20 @@ const stats = [
 ];
 
 const learnMore = (
-  <SquishyButton variant="sand" href="#colleges">
-    Learn More
-    <svg
-      className="h-3.5 w-3.5 text-[#001546]"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h13M12 5l7 7-7 7" />
-    </svg>
-  </SquishyButton>
+  <PixelButton
+    href="/about"
+    className="px-6 py-3 text-xs sm:text-sm font-bold tracking-wide"
+    background="#001546"
+    pixelColor="#FFB21A"
+    fontDefaultColor="#FFFFFF"
+    fontHoverColor="#001546"
+    pixelSize={14}
+    staggerStep={0.02}
+    reveal="random"
+  >
+    <span>Learn More</span>
+    <ArrowRight className="h-4 w-4" />
+  </PixelButton>
 );
 
 export default function AboutUs() {
@@ -82,7 +83,7 @@ export default function AboutUs() {
   const [linedUp, setLinedUp] = useState(false);
 
   return (
-    <section id="about" className="bg-[#FFF9EE] px-6 py-[clamp(2.5rem,6vh,4.5rem)] lg:px-12 border-b border-[#FFE9C2]/60">
+    <section id="about" className="bg-[#FFF9EE] px-6 py-[clamp(2.5rem,6vh,4.5rem)] lg:py-[clamp(1.5rem,6vh,4.5rem)] lg:px-12 border-b border-[#FFE9C2]/60">
       <div className="mx-auto max-w-7xl">
         {/* Eyebrow */}
         <div className="flex justify-center">
@@ -93,7 +94,7 @@ export default function AboutUs() {
         </div>
 
         {/* Heading */}
-        <h2 className="mx-auto mt-4 max-w-2xl text-center font-serif text-[clamp(1.5rem,4vw,2.75rem)] font-bold leading-tight tracking-tight text-[#0C1230]">
+        <h2 className="mx-auto mt-4 max-w-2xl text-center font-serif text-[clamp(1.5rem,4vw,2.75rem)] lg:mt-[calc(16*var(--dk-space))] lg:text-(length:--dk-h2) font-bold leading-tight tracking-tight text-[#0C1230]">
           A Place To Learn,
           <br />
           Discover, <em className="font-serif italic text-[#D23F12]">And Lead</em>
@@ -110,7 +111,7 @@ export default function AboutUs() {
             Pure CSS transform transitions — compositor-run, no per-frame JS. */}
         <div
           ref={cardsRef}
-          className="mx-auto mt-8 flex max-w-[720px] items-start justify-center gap-0 sm:gap-2"
+          className="mx-auto mt-8 lg:mt-[calc(32*var(--dk-space))] flex max-w-[720px] items-start justify-center gap-0 sm:gap-2"
           onPointerEnter={(e) => {
             if (e.pointerType !== "touch") setLinedUp(true);
           }}
@@ -125,14 +126,14 @@ export default function AboutUs() {
                 ? `translate(0px, 0px) rotate(${card.rotate}deg) scale(1)`
                 : inView
                   ? // Side by side: undo the overlap plus a small gap, lift to the centre card's top
-                    `translate(${side * 28}px, -40px) rotate(0deg) scale(1)`
+                    `translate(${side * 28}px, calc(-40 * var(--dk-space))) rotate(0deg) scale(1)`
                   : // Behind the centre card
-                    `translate(${-side * 90}%, -40px) rotate(0deg) scale(0.9)`;
+                    `translate(${-side * 90}%, calc(-40 * var(--dk-space))) rotate(0deg) scale(0.9)`;
             return (
               <div
                 key={card.badge}
                 style={{ transform }}
-                className={`relative w-[33%] max-w-[145px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform motion-reduce:transition-none sm:w-[28%] sm:max-w-[170px] lg:max-w-[200px] ${card.className}`}
+                className={`relative w-[33%] max-w-[145px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform motion-reduce:transition-none sm:w-[28%] sm:max-w-[170px] lg:max-w-[calc(200*var(--dk-ui))] ${card.className}`}
               >
                 <Link
                   href={card.href}
@@ -158,7 +159,7 @@ export default function AboutUs() {
 
         {/* Stats — phones: 2×2, left-aligned, Learn More in the 4th cell;
             sm and up: three centred columns with the button below */}
-        <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-7 border-t border-[#FFE9C2] pt-6 sm:grid-cols-3 sm:gap-0">
+        <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-7 border-t border-[#FFE9C2] pt-6 sm:grid-cols-3 sm:gap-0 lg:mt-[calc(32*var(--dk-space))] lg:pt-[calc(24*var(--dk-space))]">
           {stats.map((stat, i) => (
             <div
               key={stat.label}
@@ -166,7 +167,7 @@ export default function AboutUs() {
                 i > 0 ? "sm:border-l sm:border-[#FFE9C2]" : ""
               }`}
             >
-              <p className="font-serif text-[clamp(1.25rem,2.6vw,1.875rem)] font-bold text-[#001546]">
+              <p className="font-serif text-[clamp(1.25rem,2.6vw,1.875rem)] lg:text-[calc(30*var(--dk-type))] font-bold text-[#001546]">
                 {stat.value}
                 <span className="text-[0.65em] align-top text-[#D23F12]">{stat.unit}</span>
               </p>
@@ -176,7 +177,7 @@ export default function AboutUs() {
                   {stat.accent}
                 </em>
               </p>
-              <p className="mt-2 max-w-[16rem] text-[clamp(0.65rem,0.9vw,0.75rem)] leading-relaxed text-[#5A6382] sm:mx-auto">
+              <p className="mt-2 max-w-[19rem] text-sm lg:text-[15px] leading-relaxed text-[#5A6382] sm:mx-auto">
                 {stat.body}
               </p>
             </div>
@@ -187,7 +188,7 @@ export default function AboutUs() {
         </div>
 
         {/* Learn more pill (sm and up) */}
-        <div className="mt-8 hidden justify-center sm:flex">{learnMore}</div>
+        <div className="mt-8 hidden justify-center sm:flex lg:mt-[calc(32*var(--dk-space))]">{learnMore}</div>
       </div>
     </section>
   );

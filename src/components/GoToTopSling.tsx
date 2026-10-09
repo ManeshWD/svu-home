@@ -27,12 +27,13 @@ export default function GoToTopSling() {
       hero.scrollIntoView({ behavior: "smooth" });
     } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
+      document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
     <div
-      className={`fixed bottom-[calc(env(safe-area-inset-bottom)+104px)] right-4 lg:bottom-14 lg:right-8 z-30 flex flex-col items-center gap-1.5 transition-all duration-300 pointer-events-auto select-none ${
+      className={`fixed bottom-[calc(env(safe-area-inset-bottom)+119px)] right-4 lg:bottom-14 lg:right-8 z-50 flex flex-col items-center gap-1.5 transition-all duration-300 pointer-events-auto select-none ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
       }`}
     >

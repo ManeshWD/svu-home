@@ -13,11 +13,41 @@
   --color-ink: #0C1230;
 }
 
+/* Titles use Libre Baskerville; everything else — nav, buttons, labels,
+   stats — uses Lato, so the former monospace accents (font-mono) map to it */
+@theme inline {
+  --font-mono: var(--font-sans);
+}
+
 @layer base {
   :root {
-    --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-serif: var(--font-serif), 'Playfair Display', Georgia, serif;
+    /* --font-serif and --font-sans come from next/font (layout.tsx) */
+    --font-heading: var(--font-serif), 'Libre Baskerville', Georgia, serif;
+
+    /* Desktop compaction units. Each is 1px below lg, so `calc(N * unit)`
+       is exactly the design's N px on phones/tablets — and on desktops of
+       1920×960 or larger. Below that they ease down with whichever of
+       width/height is tighter, so laptops see the same layout, just denser.
+       Width alone bottoms out at 1280px; height keeps going down to 560px,
+       since a 720–768px laptop screen leaves only ~590px of browser
+       viewport. Spacing gives the most, type the least.
+                                                   floor: width / height */
+    --dk-space: 1px; /* section padding, margins, gaps   0.60 / 0.45 */
+    --dk-ui: 1px;    /* card heights/padding, buttons     0.80 / 0.65 */
+    --dk-type: 1px;  /* headings & display numerals       0.86 / 0.78 */
+
+    /* Section heading sizes (desktop) built on the type unit */
+    --dk-h2: calc(44 * var(--dk-type));
+    --dk-h2-lg: calc(52 * var(--dk-type));
+    --dk-h2-xl: calc(60 * var(--dk-type));
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --dk-space: clamp(0.45px, min(max(calc(0.6px + (100vw - 1280px) * 0.000625), 0.6px), calc(0.45px + (100vh - 560px) * 0.001375)), 1px);
+      --dk-ui: clamp(0.65px, min(max(calc(0.8px + (100vw - 1280px) * 0.0003125), 0.8px), calc(0.65px + (100vh - 560px) * 0.000875)), 1px);
+      --dk-type: clamp(0.78px, min(max(calc(0.86px + (100vw - 1280px) * 0.00021875), 0.86px), calc(0.78px + (100vh - 560px) * 0.00055)), 1px);
+    }
   }
 
   body {
@@ -43,6 +73,17 @@
   @media (max-width: 1023.98px) {
     body {
       padding-bottom: calc(env(safe-area-inset-bottom) + 88px);
+    }
+
+    /* Homepage: the footer itself runs down behind the tab bar, so the strip
+       there carries the footer's background (glows included) instead of
+       the body's flat navy, which read as a black band */
+    body:has(#contact > footer) {
+      padding-bottom: 0;
+    }
+    #contact > footer {
+      /* !important: beats the footer's own pb-14 utility (this sits in @layer base) */
+      padding-bottom: calc(env(safe-area-inset-bottom) + 88px + 3.5rem) !important;
     }
 
     /* Anchor jumps land below the scroll-up top bar */
@@ -114,10 +155,32 @@
   }
 }
 
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 28s linear infinite;
+  animation: marquee 32s linear infinite;
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 32s linear infinite;
+}
+
+/* Recruiter logo rows: own compositor layer, slower steady glide */
+.recruiter-track {
+  will-change: transform;
+  backface-visibility: hidden;
+  animation-duration: 45s;
 }
 
 
@@ -151,20 +214,62 @@
     right: calc(var(--fan-size) / -2);
 }
 
+/* Phones/tablets */
+@media (max-width: 1023.98px) {
+    /* Hero: the left-middle spot falls on the video, so a larger fan sits
+       on the right edge of the navy headline band instead */
+    .svu-fan-watermark--hero {
+        --fan-size: min(72vw, 280px);
+        left: auto;
+        right: calc(var(--fan-size) / -2);
+        top: calc(200px - var(--fan-size) / 2);
+        margin-top: 0;
+    }
+
+    /* Sections with a mobilePair: one fan high up, the other low down on the
+       opposite side, so they alternate with a gap between them */
+    .svu-fan-watermark--m-upper {
+        top: 22%;
+    }
+    .svu-fan-watermark--m-lower {
+        top: 78%;
+    }
+
+    .svu-fan-watermark--desktop-only {
+        display: none;
+    }
+}
+
+@media (min-width: 1024px) {
+    .svu-fan-watermark--mobile-only {
+        display: none;
+    }
+}
+
 .svu-fan-watermark--light {
     color: #FFFFFF;
-    opacity: 0.07;
+    opacity: 0.12;
 }
 .svu-fan-watermark--dark {
     color: #001546;
-    opacity: 0.06;
+    opacity: 0.09;
 }
 
-.svu-fan-watermark svg {
+.svu-fan-watermark svg,
+.svu-fan-watermark-art {
     display: block;
     width: 100%;
     height: 100%;
-    animation: svu-fan-spin 18s linear infinite;
+    background-color: currentColor;
+    -webkit-mask-image: url('/svu-watermark.png');
+    mask-image: url('/svu-watermark.png');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    animation: svu-fan-spin 26s linear infinite;
     will-change: transform;
 }
 
@@ -175,7 +280,7 @@
 }
 .svu-fan-watermark--behind.svu-fan-watermark--dark {
     color: #1F45D6;
-    opacity: 0.2;
+    opacity: 0.22;
 }
 .svu-fan-watermark--behind.svu-fan-watermark--light {
     color: #23B5E9;
@@ -183,7 +288,8 @@
 }
 
 /* Right-side fans spin the other way so the pair mirrors */
-.svu-fan-watermark--right svg {
+.svu-fan-watermark--right svg,
+.svu-fan-watermark--right .svu-fan-watermark-art {
     animation-direction: reverse;
 }
 
@@ -193,7 +299,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .svu-fan-watermark svg {
+    .svu-fan-watermark svg,
+    .svu-fan-watermark-art {
         animation: none;
     }
 }
@@ -217,6 +324,7 @@
    ========================================================================== */
 [data-offscreen] :is(
     .svu-fan-watermark svg,
+    .svu-fan-watermark-art,
     .animate-marquee,
     .animate-pulse,
     .orbit-ring,
@@ -425,6 +533,110 @@
 @keyframes svu-notice-fill {
     from { width: 3px; }
     to { width: 100%; }
+}
+
+/* Notice dates — split-flap cards (FlipDate.tsx). The top flap folds down
+   from the previous value, then the bottom flap lands on the real one. */
+.svu-flip-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+}
+.svu-flip-card {
+    --flip-h: 2.4rem;
+    position: relative;
+    display: block;
+    height: var(--flip-h);
+    perspective: 240px;
+    border-radius: 7px;
+    box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.7);
+}
+.svu-flip-half {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    backface-visibility: hidden;
+}
+.svu-flip-top {
+    top: 0;
+    border-radius: 7px 7px 0 0;
+    background: linear-gradient(#123577, #0C2A66);
+    transform-origin: bottom;
+}
+.svu-flip-bottom {
+    bottom: 0;
+    border-radius: 0 0 7px 7px;
+    background: linear-gradient(#0A2560, #082052);
+    transform-origin: top;
+}
+.svu-flip-digit {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--flip-h);
+    line-height: var(--flip-h);
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: #FFE9C2;
+}
+.svu-flip-bottom .svu-flip-digit {
+    top: -100%;
+}
+/* Hinge: a dark seam with small notches on both edges */
+.svu-flip-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-0.5px);
+    background: #001546;
+    z-index: 3;
+}
+.svu-flip-card::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    top: 50%;
+    height: 6px;
+    transform: translateY(-50%);
+    background:
+        radial-gradient(circle at left, #001546 2px, transparent 2.5px) left / 4px 100% no-repeat,
+        radial-gradient(circle at right, #001546 2px, transparent 2.5px) right / 4px 100% no-repeat;
+    z-index: 3;
+}
+.svu-flip-flap-top {
+    z-index: 2;
+    animation: svu-flip-top var(--flip-top-dur, 200ms) cubic-bezier(0.55, 0, 0.9, 0.4) both;
+}
+.svu-flip-flap-bottom {
+    z-index: 2;
+    animation: svu-flip-bottom var(--flip-bottom-dur, 250ms) cubic-bezier(0.2, 0.7, 0.3, 1.25) var(--flip-top-dur, 200ms) both;
+}
+@keyframes svu-flip-top {
+    from { transform: rotateX(0deg); filter: brightness(1); }
+    to { transform: rotateX(-90deg); filter: brightness(1.5); }
+}
+@keyframes svu-flip-bottom {
+    from { transform: rotateX(90deg); filter: brightness(0.6); }
+    to { transform: rotateX(0deg); filter: brightness(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-flip-flap-top,
+    .svu-flip-flap-bottom {
+        animation-duration: 1ms;
+        animation-delay: 0ms;
+    }
 }
 
 /* ==========================================================================
@@ -1209,7 +1421,7 @@
 .orbit-hub-title {
     color: var(--ink);
     font-family: var(--font-serif);
-    font-size: clamp(1.7rem, 3vw, 2.6rem);
+    font-size: min(clamp(1.7rem, 3vw, 2.6rem), calc(41.6 * var(--dk-type)));
     font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.025em;
@@ -1643,6 +1855,9 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     position: relative;
     display: inline-block;
+    /* The whole button is sized in em off this, so desktops compact it
+       proportionally; 16px everywhere else */
+    font-size: calc(16 * var(--dk-ui));
     border-radius: 100em;
     background-color: rgba(var(--sq-shell-rgb), 0.85);
     box-shadow:
@@ -1811,6 +2026,81 @@
     animation: svuHeartbeat 1.35s ease-in-out infinite;
     transform-origin: center;
     will-change: transform;
+}
+
+/* ==========================================================================
+   Mobile bottom sheets (BottomSheet.tsx) — transform/opacity transitions
+   only, so the slide runs on the compositor at 60fps. The sheet is parked
+   off-screen and `.is-shown` brings it home; while dragging, the component
+   writes an inline transform with the transition switched off.
+   ========================================================================== */
+.svu-sheet-backdrop {
+    opacity: 0;
+    transition: opacity 300ms ease;
+}
+.svu-sheet-backdrop.is-shown {
+    opacity: 1;
+}
+
+.svu-sheet {
+    transform: translate3d(0, 100%, 0);
+    transition: transform 380ms cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+    /* Keeps the sheet's own layout work from touching the page beneath */
+    contain: layout;
+}
+.svu-sheet.is-shown {
+    transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-sheet,
+    .svu-sheet-backdrop {
+        transition-duration: 1ms;
+    }
+}
+
+/* ==========================================================================
+   Mobile menu (MobileMenu.tsx) — each panel swap replays a short slide-in;
+   rows rise in with a stagger set inline via animation-delay. All
+   transform/opacity, so they run on the compositor.
+   ========================================================================== */
+.svu-menu-panel {
+    animation: svu-menu-panel-in 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.svu-menu-item {
+    animation: svu-menu-item-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Sub-menu dropdown: grid row grows from 0fr to its content height */
+.svu-menu-dropdown {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.svu-menu-dropdown.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+@keyframes svu-menu-panel-in {
+    from { opacity: 0; transform: translate3d(24px, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes svu-menu-item-in {
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-menu-panel,
+    .svu-menu-item {
+        animation: none;
+    }
+    .svu-menu-dropdown {
+        transition: none;
+    }
 }
 
 /* Install card (MobileAppShell): ring around the ✕ fills, then the card closes */

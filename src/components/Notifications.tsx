@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+import PixelButton from "./PixelButton";
+import FlipDate from "./FlipDate";
 import { noticeCategories } from "@/data/notices";
 
 const categories = noticeCategories;
@@ -32,6 +34,15 @@ export default function Notifications() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+  // Date counters replay every time the notice list scrolls into view,
+  // from either direction
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelInView = useInView(panelRef, { amount: 0.6 });
+  const [{ datePlay, wasInView }, setDateState] = useState({ datePlay: 0, wasInView: false });
+  if (panelInView !== wasInView) {
+    setDateState((s) => ({ datePlay: panelInView ? s.datePlay + 1 : s.datePlay, wasInView: panelInView }));
+  }
+
   const autoplay = !reduceMotion && canHover;
   const running = autoplay && inView && !itemActive;
 
@@ -70,7 +81,7 @@ export default function Notifications() {
     <section
       ref={sectionRef}
       id="notifications"
-      className="relative bg-[#001546] px-6 py-[clamp(3.5rem,8vh,6rem)] text-white lg:px-12"
+      className="relative bg-[#001546] px-6 py-[clamp(3.5rem,8vh,6rem)] text-white lg:px-12 lg:py-[clamp(2rem,8vh,6rem)]"
       aria-labelledby="notifications-heading"
     >
       {/* Vertical margin label */}
@@ -92,8 +103,8 @@ export default function Notifications() {
           </div>
 
           {/* Title row: category heading + arrows (arrows sit in the eyebrow row on mobile) */}
-          <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-            <div className="relative min-h-[1.2em] overflow-hidden font-serif text-[2rem] sm:text-[clamp(2.25rem,5.5vw,3.75rem)] font-bold leading-[1.1] tracking-tight">
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-6 lg:mt-[calc(16*var(--dk-space))]">
+            <div className="relative min-h-[1.2em] overflow-hidden font-serif text-[2rem] sm:text-[clamp(2.25rem,5.5vw,3.75rem)] lg:text-(length:--dk-h2-xl) font-bold leading-[1.1] tracking-tight">
               <AnimatePresence mode="wait" initial={false} custom={direction}>
                 <motion.h2
                   key={current.key}
@@ -114,7 +125,7 @@ export default function Notifications() {
           </div>
 
           {/* Category tabs + description */}
-          <div className="mt-5 flex flex-wrap items-start justify-between gap-x-10 gap-y-4">
+          <div className="mt-5 flex flex-wrap items-start justify-between gap-x-10 gap-y-4 lg:mt-[calc(20*var(--dk-space))]">
             <div className="max-w-xl">
               <div role="tablist" aria-label="Notification categories" className="flex flex-wrap gap-x-5 gap-y-2">
                 {categories.map((c, i) => (
@@ -151,13 +162,13 @@ export default function Notifications() {
                   </button>
                 ))}
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-[#FFE9C2]/70">{current.description}</p>
+              <p className="mt-4 text-sm leading-relaxed text-[#FFE9C2]/70 lg:mt-[calc(16*var(--dk-space))]">{current.description}</p>
             </div>
             <span className="pt-1 text-sm text-white/40">{current.range}</span>
           </div>
 
           {/* Notice list */}
-          <div id="notifications-panel" role="tabpanel" className="relative mt-10">
+          <div ref={panelRef} id="notifications-panel" role="tabpanel" className="relative mt-10 lg:mt-[calc(40*var(--dk-space))]">
             {/* Frosted strip behind the date column — ends where the list's
                 dividers end, feathered on the left/top/bottom so it melts into
                 the list, blurring the fan behind it */}
@@ -188,7 +199,7 @@ export default function Notifications() {
                       onMouseLeave={() => setItemActive(false)}
                       onFocus={() => setItemActive(true)}
                       onBlur={() => setItemActive(false)}
-                      className="group block py-5 pr-2 sm:grid sm:grid-cols-[4rem_1fr_auto] sm:items-start sm:gap-x-6 sm:py-6 sm:pr-12"
+                      className="group block py-5 pr-2 sm:grid sm:grid-cols-[4rem_1fr_auto] sm:items-start sm:gap-x-6 sm:py-6 sm:pr-12 lg:py-[calc(24*var(--dk-space))]"
                     >
                       {/* Mobile Row 1: Number and Date on one line */}
                       <div className="flex items-center justify-between sm:contents">
@@ -212,9 +223,9 @@ export default function Notifications() {
                       </div>
 
                       {/* Desktop Col 3: Date */}
-                      <time className="hidden whitespace-nowrap pt-0.5 text-sm tabular-nums text-white/45 sm:block">
-                        {item.date}
-                      </time>
+                      <div className="hidden sm:block">
+                        <FlipDate date={item.date} play={datePlay} delay={i * 120} />
+                      </div>
                     </a>
                   </li>
                 ))}
@@ -222,13 +233,22 @@ export default function Notifications() {
             </AnimatePresence>
           </div>
 
-          <a
-            href={current.all.href}
-            className="group mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#FFB21A] hover:text-[#FFC94D]"
-          >
-            {current.all.label}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </a>
+          <div className="mt-8 lg:mt-[calc(32*var(--dk-space))]">
+            <PixelButton
+              href={current.all.href}
+              className="px-6 py-3 text-xs sm:text-sm font-bold tracking-wide"
+              background="#FFB21A"
+              pixelColor="#001546"
+              fontDefaultColor="#001546"
+              fontHoverColor="#FFB21A"
+              pixelSize={14}
+              staggerStep={0.02}
+              reveal="random"
+            >
+              <span>{current.all.label}</span>
+              <ArrowRight className="h-4 w-4" />
+            </PixelButton>
+          </div>
         </div>
       </MotionConfig>
     </section>

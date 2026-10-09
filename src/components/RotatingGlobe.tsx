@@ -267,7 +267,10 @@ export default function RotatingGlobe() {
 
       // 1. Atmospheric back glow behind the sphere
       if (chromeAlpha > 0) {
-        const bgGlow = ctx.createRadialGradient(cx, cy, globeRadius * 0.75, cx, cy, globeRadius * 1.35);
+        // Fade out before the nearest canvas edge — a glow running past it
+        // was cut off in a hard line under the globe
+        const glowR = Math.min(globeRadius * 1.35, cx, width - cx, cy, height - cy);
+        const bgGlow = ctx.createRadialGradient(cx, cy, Math.min(globeRadius * 0.75, glowR * 0.7), cx, cy, glowR);
         bgGlow.addColorStop(0, "rgba(31, 69, 214, 0.22)"); // Sapphire glow
         bgGlow.addColorStop(0.5, "rgba(35, 181, 233, 0.08)"); // Sky glow
         bgGlow.addColorStop(1, "transparent");
@@ -276,7 +279,7 @@ export default function RotatingGlobe() {
         ctx.globalAlpha = chromeAlpha;
         ctx.fillStyle = bgGlow;
         ctx.beginPath();
-        ctx.arc(cx, cy, globeRadius * 1.35, 0, TAU);
+        ctx.arc(cx, cy, glowR, 0, TAU);
         ctx.fill();
         ctx.restore();
       }
@@ -405,9 +408,9 @@ export default function RotatingGlobe() {
           const title = "SVU";
           const sub = "Tirupati, Andhra Pradesh";
           const cta = "Click to explore ›";
-          ctx.font = "800 11px 'Plus Jakarta Sans', sans-serif";
+          ctx.font = "700 11px 'Libre Baskerville', Georgia, serif";
           const titleW = ctx.measureText(title).width;
-          ctx.font = "600 9px 'Inter', sans-serif";
+          ctx.font = "600 9px 'Lato', sans-serif";
           const subW = ctx.measureText(sub).width;
           const bw = Math.max(titleW, subW) + 18;
           const bh = 46;
@@ -423,13 +426,13 @@ export default function RotatingGlobe() {
           ctx.stroke();
 
           ctx.fillStyle = "#FFB21A";
-          ctx.font = "800 11px 'Plus Jakarta Sans', sans-serif";
+          ctx.font = "700 11px 'Libre Baskerville', Georgia, serif";
           ctx.fillText(title, bx + 9, by + 14);
           ctx.fillStyle = "rgba(255, 233, 194, 0.85)";
-          ctx.font = "600 9px 'Inter', sans-serif";
+          ctx.font = "600 9px 'Lato', sans-serif";
           ctx.fillText(sub, bx + 9, by + 27);
           ctx.fillStyle = "#23B5E9";
-          ctx.font = "700 8.5px 'Inter', sans-serif";
+          ctx.font = "700 8.5px 'Lato', sans-serif";
           ctx.fillText(cta, bx + 9, by + 39);
 
           label = new DOMRect(bx, by, bw, bh);

@@ -2,44 +2,22 @@
 
 import { useState } from "react";
 import { MotionConfig, motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
-import SquishyButton from "./SquishyButton";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import PixelButton from "./PixelButton";
+import { categoryColor, featuredEvents } from "@/data/events";
 
-// Placeholder events — replace with the university's real calendar.
-const events = [
-  {
-    day: "14",
-    month: "Nov",
-    title: "Campus Placement Drive 2026",
-    description: "Recruiters from IT, core engineering and finance interview final-year students on campus.",
-    href: "#",
-    color: "#1F45D6",
-  },
-  {
-    day: "28",
-    month: "Nov",
-    title: "National Science Symposium",
-    description: "Research talks, poster sessions and lab tours across the College of Sciences.",
-    href: "#",
-    color: "#D23F12",
-  },
-  {
-    day: "06",
-    month: "Dec",
-    title: "Annual Sports Meet",
-    description: "Three days of athletics, cricket and kabaddi at the university grounds.",
-    href: "#",
-    color: "#0E8050",
-  },
-  {
-    day: "19",
-    month: "Dec",
-    title: "Alumni Career Connect",
-    description: "Alumni mentors share career paths and open referrals for current students.",
-    href: "#",
-    color: "#1F45D6",
-  },
-];
+// Homepage cards — the featured events from the shared calendar (see /events)
+const events = featuredEvents.map((e) => {
+  const d = new Date(`${e.date}T00:00:00`);
+  return {
+    day: String(d.getDate()).padStart(2, "0"),
+    month: d.toLocaleString("en-US", { month: "short" }),
+    year: d.getFullYear(),
+    title: e.title,
+    description: e.description,
+    color: categoryColor[e.category],
+  };
+});
 
 const squish = { duration: 1, ease: "backInOut" } as const;
 
@@ -58,7 +36,7 @@ function EventCard({ event }: { event: (typeof events)[number] }) {
         initial: { scale: 1 },
         hover: { scale: 1.05 },
       }}
-      className="relative block h-80 w-full overflow-hidden rounded-xl p-7 outline-none cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-[#FFB21A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#001546]"
+      className="relative block h-80 w-full overflow-hidden rounded-xl p-7 lg:p-[calc(28*var(--dk-ui))] outline-none cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-[#FFB21A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#001546]"
       style={{ backgroundColor: event.color }}
     >
       <div className="relative z-10 text-white">
@@ -71,13 +49,13 @@ function EventCard({ event }: { event: (typeof events)[number] }) {
           transition={squish}
           className="block origin-top-left font-[family-name:var(--font-heading)] leading-none"
         >
-          <span className="block text-6xl font-black tracking-tight">{event.day}</span>
+          <span className="block text-6xl lg:text-[calc(60*var(--dk-type))] font-black tracking-tight">{event.day}</span>
           <span className="mt-1 block text-sm font-bold uppercase tracking-[0.18em] text-white/80">
-            {event.month} 2026
+            {event.month} {event.year}
           </span>
         </motion.span>
 
-        <h3 className="mt-8 text-xl font-bold leading-snug">{event.title}</h3>
+        <h3 className="mt-8 lg:mt-[calc(32*var(--dk-space))] text-xl font-bold leading-snug">{event.title}</h3>
         <p className="mt-2 text-sm leading-relaxed text-white/80">{event.description}</p>
       </div>
 
@@ -155,7 +133,7 @@ export default function Events() {
           <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-[#23B5E9] mb-2">
             Events
           </span>
-          <h2 className="font-serif text-[clamp(1.5rem,4vw,2.75rem)] font-bold leading-tight text-white tracking-tight">
+          <h2 className="font-serif text-[clamp(1.5rem,4vw,2.75rem)] lg:text-(length:--dk-h2) font-bold leading-tight text-white tracking-tight">
             What&apos;s happening at SVU
           </h2>
           <p className="mt-3 text-[clamp(0.85rem,1.2vw,1.1rem)] text-[#FFE9C2]/85 max-w-2xl mx-auto font-normal leading-relaxed">
@@ -165,15 +143,28 @@ export default function Events() {
 
         {/* Event cards */}
         <MotionConfig reducedMotion="user">
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="mt-10 lg:mt-[calc(40*var(--dk-space))] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {events.map((event) => (
               <EventCard key={event.title} event={event} />
             ))}
           </div>
         </MotionConfig>
 
-        <div className="mt-10 flex justify-center">
-          <SquishyButton variant="sand">View all events</SquishyButton>
+        <div className="mt-10 lg:mt-[calc(40*var(--dk-space))] flex justify-center">
+          <PixelButton
+            href="/events"
+            className="px-7 py-3.5 text-xs sm:text-sm font-bold tracking-wide"
+            background="#FFB21A"
+            pixelColor="#001546"
+            fontDefaultColor="#001546"
+            fontHoverColor="#FFB21A"
+            pixelSize={14}
+            staggerStep={0.02}
+            reveal="random"
+          >
+            <span>View all events</span>
+            <ArrowRight className="h-4 w-4" />
+          </PixelButton>
         </div>
       </div>
     </section>

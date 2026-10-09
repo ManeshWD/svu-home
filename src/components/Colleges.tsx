@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Palette, Camera } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Landmark, Camera } from "lucide-react";
+import PixelButton from "./PixelButton";
 
 type College = {
   year: string;
@@ -35,7 +36,7 @@ const colleges: College[] = [
     meta: "PG · Ph.D. · Est. 1954",
     body:
       "Languages, literature, social sciences and philosophy founded alongside the university, establishing Tirupati's oldest scholarly heritage.",
-    href: "#arts",
+    href: "/colleges/arts",
     tone: "dark",
   },
   {
@@ -51,7 +52,7 @@ const colleges: College[] = [
     meta: "PG · Ph.D. · Est. 1956",
     body:
       "State-of-the-art physical, chemical, and biological laboratories conducting high-impact funded research across southern India.",
-    href: "#sciences",
+    href: "/colleges/sciences",
     tone: "sand",
   },
   {
@@ -67,7 +68,7 @@ const colleges: College[] = [
     meta: "UG · PG · Ph.D. · Est. 1959",
     body:
       "Civil, mechanical, electrical, electronics and computer engineering backed by industry tech incubators and robotics facilities.",
-    href: "#engineering",
+    href: "/colleges/engineering",
     tone: "dark",
   },
   {
@@ -83,7 +84,7 @@ const colleges: College[] = [
     meta: "PG · Ph.D. · Est. 1972",
     body:
       "Fostering corporate leadership, business analytics, and advanced computing paradigms with distinguished campus recruitment.",
-    href: "#commerce",
+    href: "/colleges/cm-cs",
     tone: "sand",
   },
   {
@@ -99,7 +100,7 @@ const colleges: College[] = [
     meta: "UG · PG · Ph.D. · Est. 2007",
     body:
       "Precision pharmaceutics, drug design, biotechnology, and clinical pharmacology research compliant with global healthcare benchmarks.",
-    href: "#pharmacy",
+    href: "/colleges/pharmacy",
     tone: "dark",
   },
 ];
@@ -270,9 +271,9 @@ export default function Colleges() {
         </div>
 
         {/* Heading row: Title on Left, Stacked Pills in 2 lines above Arrows on Right */}
-        <div className="mt-5 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mt-5 flex flex-col gap-8 lg:mt-[calc(20*var(--dk-space))] lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl xl:max-w-3xl">
-            <h2 className="font-serif text-[clamp(1.8rem,4vw,3.2rem)] font-bold tracking-tight text-[#0C1230]">
+            <h2 className="font-serif text-[clamp(1.8rem,4vw,3.2rem)] lg:text-[calc(51.2*var(--dk-type))] lg:leading-[calc(76.8*var(--dk-ui))] lg:text-balance font-bold tracking-tight text-[#0C1230]">
               The Journey of Sri Venkateswara University
             </h2>
             <p className="mt-3 text-[clamp(0.85rem,1.1vw,1rem)] leading-relaxed text-[#5A6382]">
@@ -282,31 +283,26 @@ export default function Colleges() {
 
           {/* Right Column: Credential Pills (Line 1: bigger, Line 2: shorter) directly on top of Navigation Arrows */}
           <div className="flex flex-col items-start lg:items-end gap-3 shrink-0 self-start lg:self-end">
-            {/* Line 1: Bigger Pills */}
-            <div className="flex flex-wrap items-center gap-2 justify-start lg:justify-end">
-              <span className="flex items-center gap-2 rounded-full border border-[#FFE9C2] bg-white px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#001546] shadow-sm backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0E8050]" />
-                NAAC A+ Accredited
-              </span>
-              <span className="flex items-center gap-2 rounded-full border border-[#FFE9C2] bg-white px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#001546] shadow-sm backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0E8050]" />
-                70+ Specialized Programmes
-              </span>
+            {/* Line 1: Accreditation logos */}
+            <div className="flex items-center gap-4 justify-start lg:justify-end">
+              <Image
+                src="/accreditation/naac-a-plus.webp"
+                alt="NAAC — accredited with grade A+"
+                width={207}
+                height={192}
+                className="h-20 w-auto drop-shadow-sm"
+              />
+              <span className="h-12 w-px bg-[#001546]/15" aria-hidden="true" />
+              <Image
+                src="/accreditation/ugc.webp"
+                alt="UGC (University Grants Commission) — Category-I university"
+                width={266}
+                height={192}
+                className="h-20 w-auto"
+              />
             </div>
 
-            {/* Line 2: Shorter Pills */}
-            <div className="flex flex-wrap items-center gap-2 justify-start lg:justify-end">
-              <span className="flex items-center gap-2 rounded-full border border-[#FFE9C2] bg-white px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#001546] shadow-sm backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0E8050]" />
-                UGC Category-I
-              </span>
-              <span className="flex items-center gap-2 rounded-full border border-[#FFE9C2] bg-white px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#001546] shadow-sm backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0E8050]" />
-                Est. 1954
-              </span>
-            </div>
-
-            {/* Line 3: Navigation Arrows positioned directly below the pills */}
+            {/* Navigation Arrows */}
             <div className="flex items-center gap-2.5 pt-1">
               <button
                 onClick={handlePrev}
@@ -345,7 +341,7 @@ export default function Colleges() {
             setIsPaused(false);
           }
         }}
-        className={`relative mt-10 w-full overflow-hidden pb-12 pt-4 select-none touch-pan-y ${
+        className={`relative mt-10 w-full overflow-hidden pb-12 pt-4 lg:mt-[calc(40*var(--dk-space))] lg:pb-[calc(48*var(--dk-space))] select-none touch-pan-y ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
         aria-label="Constituent colleges carousel"
@@ -372,7 +368,8 @@ export default function Colleges() {
                 } ${isActive ? "is-active" : ""}`}
                 style={{
                   width: `${cardWidth}px`,
-                  minHeight: "clamp(380px, 46vw, 440px)",
+                  // Desktops compact via --dk-ui (1px on phones/tablets → unchanged)
+                  minHeight: "min(clamp(380px, 46vw, 440px), calc(440 * var(--dk-ui)))",
                 }}
               >
                 <div className="flex h-full w-full flex-col sm:flex-row">
@@ -418,23 +415,23 @@ export default function Colleges() {
 
                     {/* Status Indicator Badge */}
                     <div className="absolute bottom-3 left-4 z-30 flex items-center gap-1.5 rounded-full border border-white/30 bg-[#001546]/85 px-2.5 py-0.5 text-[8px] font-medium tracking-wider text-white/90 backdrop-blur-md transition-all duration-300 group-hover:bg-[#0E8050]/90 group-hover:border-[#0E8050]">
-                      <Palette className="h-2.5 w-2.5 text-[#FFB21A] group-hover:hidden" />
+                      <Landmark className="h-2.5 w-2.5 text-[#FFB21A] group-hover:hidden" />
                       <Camera className="hidden h-2.5 w-2.5 text-white group-hover:inline" />
-                      <span className="group-hover:hidden font-semibold">WATERCOLOR ART</span>
+                      <span className="group-hover:hidden font-semibold">EST. {c.year}</span>
                       <span className="hidden font-semibold text-white group-hover:inline">CAMPUS PHOTO</span>
                     </div>
                   </div>
 
                   {/* ----------------- RIGHT SIDE: Information Panel with Generous Bottom Padding ----------------- */}
                   <div
-                    className={`relative z-20 flex flex-1 flex-col justify-between p-[clamp(1.2rem,2.8vw,2.2rem)] pb-8 sm:pb-9 ${
+                    className={`relative z-20 flex flex-1 flex-col justify-between p-[clamp(1.2rem,2.8vw,2.2rem)] pb-8 sm:pb-9 lg:p-[min(2.8vw,calc(35.2*var(--dk-ui)))] lg:pb-[calc(36*var(--dk-ui))] ${
                       dark ? "text-white" : "text-[#0C1230]"
                     }`}
                   >
                     {/* Top: Large Milestone Year */}
                     <div className="flex items-start justify-between">
                       <span
-                        className={`font-sans text-[clamp(2.8rem,5.2vw,4.4rem)] font-light leading-none tracking-tight ${
+                        className={`font-sans text-[clamp(2.8rem,5.2vw,4.4rem)] lg:text-[min(5.2vw,calc(70.4*var(--dk-type)))] font-light leading-none tracking-tight ${
                           dark
                             ? "text-[#FFB21A] drop-shadow-sm font-semibold"
                             : "text-[#001546] drop-shadow-sm font-semibold"
@@ -483,18 +480,20 @@ export default function Colleges() {
 
                     {/* Bottom: Explore CTA Button with comfortable bottom spacing */}
                     <div className="flex items-center justify-between pt-3">
-                      <Link
+                      <PixelButton
                         href={c.href}
-                        draggable={false}
-                        className={`group/btn inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] whitespace-nowrap transition-all duration-300 shadow-sm ${
-                          dark
-                            ? "bg-[#FFB21A] hover:bg-[#ffc247] text-[#001546] hover:shadow-[0_4px_16px_rgba(255,178,26,0.35)]"
-                            : "bg-[#1F45D6] hover:bg-[#1a3cb8] text-white hover:shadow-[0_4px_16px_rgba(31,69,214,0.3)]"
-                        }`}
+                        className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] whitespace-nowrap shadow-sm"
+                        background={dark ? "#FFB21A" : "#1F45D6"}
+                        pixelColor={dark ? "#001546" : "#FFB21A"}
+                        fontDefaultColor={dark ? "#001546" : "#FFFFFF"}
+                        fontHoverColor={dark ? "#FFB21A" : "#001546"}
+                        pixelSize={12}
+                        staggerStep={0.02}
+                        reveal="random"
                       >
                         <span className="whitespace-nowrap">Explore College</span>
-                        <ArrowRight className="h-3 w-3 shrink-0 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                      </Link>
+                        <ArrowRight className="h-3 w-3 shrink-0" />
+                      </PixelButton>
 
                       <span
                         className={`hidden sm:inline-block text-[9px] font-semibold tracking-wider ${
@@ -522,14 +521,18 @@ export default function Colleges() {
       {/* ================================================================
           MILESTONE TIMELINE TRACK — With extra top breathing room
           ================================================================ */}
-      <div className="mx-auto mt-6 max-w-7xl px-6 lg:px-12">
-        <div className="relative flex items-start justify-between">
+      {/* Timeline + CTA share one row on larger screens */}
+      <div className="mx-auto mt-6 flex max-w-7xl flex-col gap-6 px-6 sm:flex-row sm:items-center sm:gap-8 lg:mt-[calc(24*var(--dk-space))] lg:px-12">
+        <div className="relative flex flex-1 items-start justify-between">
           {colleges.map((c, i) => {
             const on = active === i;
             return (
               <div
                 key={c.year + "-node"}
-                className="group flex flex-1 flex-col items-start cursor-pointer"
+                // Last step only as wide as its label, so the CTA sits right after it
+                className={`group flex flex-col items-start cursor-pointer ${
+                  i < colleges.length - 1 ? "flex-1" : "flex-none"
+                }`}
                 onClick={() => goToCard(i)}
               >
                 {/* Year Label */}
@@ -546,7 +549,7 @@ export default function Colleges() {
 
                 {/* College Short Name */}
                 <span
-                  className={`hidden text-[11px] transition-colors sm:block ${
+                  className={`hidden text-sm lg:text-[15px] transition-colors sm:block ${
                     on ? "font-semibold text-[#1F45D6]" : "text-[#5A6382]/80"
                   }`}
                 >
@@ -579,23 +582,23 @@ export default function Colleges() {
             );
           })}
         </div>
-      </div>
 
-      {/* Footer CTA & Information */}
-      <div className="mx-auto mt-10 flex max-w-7xl flex-col gap-4 px-6 sm:flex-row sm:items-center sm:justify-between lg:px-12">
-        <Link
-          href="#colleges"
-          className="group inline-flex w-fit items-center gap-3 rounded-full bg-[#001546] py-2.5 pl-6 pr-2 text-xs font-semibold text-white transition-all duration-300 hover:bg-[#002270] hover:shadow-lg"
+        <PixelButton
+          href="/colleges/arts"
+          className="w-fit shrink-0 py-2 pl-6 pr-2 text-xs font-semibold"
+          background="#001546"
+          pixelColor="#FFB21A"
+          fontDefaultColor="#FFFFFF"
+          fontHoverColor="#001546"
+          pixelSize={14}
+          staggerStep={0.02}
+          reveal="random"
         >
           <span>Explore All 5 Constituent Colleges</span>
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFB21A] text-[#001546] transition-transform duration-300 group-hover:translate-x-1">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFB21A] text-[#001546]">
             <ArrowRight className="h-3.5 w-3.5" />
           </span>
-        </Link>
-
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5A6382]">
-          5 Constituent Colleges &bull; Tirupati, Andhra Pradesh &bull; NAAC A+
-        </p>
+        </PixelButton>
       </div>
     </section>
   );

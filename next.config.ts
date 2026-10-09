@@ -1,8 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Themed 404 for unmatched URLs (src/app/global-not-found.tsx) — needed
+    // because the app has two root layouts, (home) and (pages)
+    globalNotFound: true,
+  },
   images: {
-    formats: ["image/avif", "image/webp"],
+    // WebP only: AVIF encodes many times slower, so each image's first
+    // request on the live server took seconds and left empty boxes
+    formats: ["image/webp"],
+    // Optimised variants are content-stable — keep them cached for a month
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: "https",

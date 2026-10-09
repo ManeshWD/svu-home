@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowRight, X, ExternalLink } from "lucide-react";
-import SquishyButton from "./SquishyButton";
+import PixelButton from "./PixelButton";
 
 interface GalleryItem {
   id: number;
@@ -291,10 +291,20 @@ export default function RotatingGallery() {
               <p>{GALLERY_SUBTITLE}</p>
             </div>
             <div className="orbit-hub-cta">
-              <SquishyButton onClick={() => setSelectedGallery(galleryItems[0])}>
-                {GALLERY_CTA_TEXT}
+              <PixelButton
+                href="/gallery"
+                className="px-6 py-3 text-xs sm:text-sm font-bold tracking-wide"
+                background="#FFB21A"
+                pixelColor="#001546"
+                fontDefaultColor="#001546"
+                fontHoverColor="#FFB21A"
+                pixelSize={14}
+                staggerStep={0.02}
+                reveal="random"
+              >
+                <span>{GALLERY_CTA_TEXT}</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </SquishyButton>
+              </PixelButton>
             </div>
           </div>
 
@@ -305,10 +315,20 @@ export default function RotatingGallery() {
           <div className="gallery-coverflow-head">
             <span className="section-eyebrow">{GALLERY_EYEBROW}</span>
             <h2 className="gallery-coverflow-title">{GALLERY_TITLE}</h2>
-            <SquishyButton onClick={() => setSelectedGallery(galleryItems[0])}>
-              {GALLERY_CTA_TEXT}
+            <PixelButton
+              href="/gallery"
+              className="px-6 py-3 text-xs sm:text-sm font-bold tracking-wide"
+              background="#FFB21A"
+              pixelColor="#001546"
+              fontDefaultColor="#001546"
+              fontHoverColor="#FFB21A"
+              pixelSize={14}
+              staggerStep={0.02}
+              reveal="random"
+            >
+              <span>{GALLERY_CTA_TEXT}</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </SquishyButton>
+            </PixelButton>
           </div>
 
           <div className="cf-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
@@ -402,13 +422,20 @@ export default function RotatingGallery() {
                 </div>
 
                 <div className="flex sm:flex-col gap-3 shrink-0">
-                  <button
+                  <PixelButton
                     onClick={() => setSelectedGallery(null)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#FFB21A] text-[#001546] font-bold text-xs uppercase tracking-wider hover:bg-[#ffc247] transition-colors cursor-pointer shadow-md"
+                    className="px-6 py-3 text-xs uppercase tracking-wider font-bold"
+                    background="#FFB21A"
+                    pixelColor="#001546"
+                    fontDefaultColor="#001546"
+                    fontHoverColor="#FFB21A"
+                    pixelSize={12}
+                    staggerStep={0.02}
+                    reveal="random"
                   >
                     <span>Open Album</span>
                     <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
+                  </PixelButton>
                   <button
                     onClick={() => setSelectedGallery(null)}
                     className="px-5 py-3 rounded-full border border-white/20 text-white font-semibold text-xs uppercase tracking-wider hover:bg-white/10 transition-colors cursor-pointer text-center"

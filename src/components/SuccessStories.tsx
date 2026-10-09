@@ -64,7 +64,7 @@ export default function SuccessStories() {
               <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-[#D23F12] mb-2">
                 Student Testimonials
               </span>
-              <h2 className="text-[clamp(1.5rem,3.6vw,2.6rem)] font-black text-[#001546] tracking-tight leading-[1.1] font-['Plus_Jakarta_Sans',sans-serif]">
+              <h2 className="text-[clamp(1.5rem,3.6vw,2.6rem)] font-black text-[#001546] tracking-tight leading-[1.1] font-[family-name:var(--font-heading)]">
                 New success<br />
                 stories every day
               </h2>
@@ -74,7 +74,7 @@ export default function SuccessStories() {
               </blockquote>
 
               <div className="mt-4">
-                <p className="text-base font-bold text-[#001546] font-['Plus_Jakarta_Sans',sans-serif]">
+                <p className="text-base font-bold text-[#001546] font-[family-name:var(--font-heading)]">
                   {currentStory.name}
                 </p>
                 <p className="text-xs font-medium text-[#5A6382] mt-0.5">

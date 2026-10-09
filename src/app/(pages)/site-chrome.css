@@ -1,0 +1,370 @@
+/* ==========================================================================
+   Site chrome on the inner pages — the homepage header (InnerHeader.tsx) and
+   footer (Footer.tsx) sit inside `.svu-chrome`. The inner pages keep their
+   own stylesheet (globals.css), so everything the homepage chrome needs from
+   the homepage stylesheet is mirrored here, scoped to `.svu-chrome`.
+   ========================================================================== */
+.svu-chrome {
+  --font-heading: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --font-sans: var(--font-lato), 'Lato', sans-serif;
+  --font-serif: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --font-mono: var(--font-lato), 'Lato', sans-serif;
+
+  /* Desktop compaction units (see the homepage globals.css) */
+  --dk-space: 1px;
+  --dk-ui: 1px;
+  --dk-type: 1px;
+  --dk-h2: calc(44 * var(--dk-type));
+  --dk-h2-lg: calc(52 * var(--dk-type));
+  --dk-h2-xl: calc(60 * var(--dk-type));
+
+  font-family: var(--font-sans);
+}
+
+@media (min-width: 1024px) {
+  .svu-chrome {
+    --dk-space: clamp(0.45px, min(max(calc(0.6px + (100vw - 1280px) * 0.000625), 0.6px), calc(0.45px + (100vh - 560px) * 0.001375)), 1px);
+    --dk-ui: clamp(0.65px, min(max(calc(0.8px + (100vw - 1280px) * 0.0003125), 0.8px), calc(0.65px + (100vh - 560px) * 0.000875)), 1px);
+    --dk-type: clamp(0.78px, min(max(calc(0.86px + (100vw - 1280px) * 0.00021875), 0.86px), calc(0.78px + (100vh - 560px) * 0.00055)), 1px);
+  }
+}
+
+/* The inner pages set fonts on every text element; inside the chrome,
+   text follows the homepage rules instead */
+.svu-chrome :is(p, span, a, button, input, select, textarea, li, address) {
+  font-family: inherit;
+}
+.svu-chrome :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-heading);
+}
+.svu-chrome .font-sans {
+  font-family: var(--font-sans);
+}
+.svu-chrome .font-serif {
+  font-family: var(--font-serif);
+}
+.svu-chrome .font-mono {
+  font-family: var(--font-mono);
+}
+
+.svu-chrome :is(a, button, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* The inner pages widen .max-w-7xl to 95%; the chrome keeps 80rem */
+.svu-chrome .max-w-7xl {
+  max-width: 80rem !important;
+}
+
+/* Theme scrollbar — the page itself and the mega menu overlay, same as the homepage */
+@supports not selector(::-webkit-scrollbar) {
+  html,
+  .svu-scroll {
+    scrollbar-color: #FFB21A #001546;
+    scrollbar-width: thin;
+  }
+}
+html::-webkit-scrollbar,
+.svu-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html::-webkit-scrollbar-track,
+.svu-scroll::-webkit-scrollbar-track {
+  background: #001546;
+}
+html::-webkit-scrollbar-thumb,
+.svu-scroll::-webkit-scrollbar-thumb {
+  background: #FFB21A;
+  border: 2px solid #001546;
+  border-radius: 999px;
+}
+html::-webkit-scrollbar-thumb:hover,
+.svu-scroll::-webkit-scrollbar-thumb:hover {
+  background: #D23F12;
+}
+html::-webkit-scrollbar-corner,
+.svu-scroll::-webkit-scrollbar-corner {
+  background: #001546;
+}
+
+/* SVU watermark art — used by the mobile menu (see the homepage globals.css) */
+.svu-fan-watermark-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  -webkit-mask-image: url("/svu-watermark.png");
+  mask-image: url("/svu-watermark.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  animation: svu-fan-spin 26s linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .svu-fan-watermark-art {
+    animation: none;
+  }
+}
+
+@keyframes svu-fan-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Footer globe → Andhra Pradesh district map (see AndhraMap.tsx).
+   Only transform/opacity animate on the containers so the hand-off from
+   the zooming canvas stays on the compositor at 60fps.
+   ========================================================================== */
+.svu-globe-canvas-wrap {
+    --globe-mask-r: 280px;
+
+    position: absolute;
+    inset: 0;
+    /* Static circular mask: invisible at rest, but softens the sphere's
+       edges into the card once it overflows the canvas during the dive */
+    -webkit-mask-image: radial-gradient(circle at 52% 52%, #000 var(--globe-mask-r), transparent calc(var(--globe-mask-r) * 1.32));
+    mask-image: radial-gradient(circle at 52% 52%, #000 var(--globe-mask-r), transparent calc(var(--globe-mask-r) * 1.32));
+    transform-origin: 50% 50%;
+    transition:
+        opacity 560ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+/* The canvas stops drawing at the hand-off; scaling its last frame carries
+   the dive on at compositor cost while the district map fades in */
+.svu-globe-canvas-wrap.is-hidden {
+    opacity: 0;
+    transform: scale(2.6);
+    pointer-events: none;
+}
+
+.svu-ap-map {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.82);
+    pointer-events: none;
+    transition:
+        opacity 560ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 820ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+}
+.svu-ap-map.is-visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.svu-ap-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 52px 18px 18px;
+    overflow: visible;
+}
+
+.svu-ap-district {
+    fill: #0B2463;
+    stroke: rgba(35, 181, 233, 0.6);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    cursor: pointer;
+    transition: fill 180ms ease, stroke 180ms ease;
+}
+.svu-ap-district:hover {
+    fill: #1F45D6;
+    stroke: #FFB21A;
+}
+.svu-ap-district.is-home {
+    fill: rgba(255, 178, 26, 0.2);
+    stroke: #FFB21A;
+}
+.svu-ap-district.is-home:hover {
+    fill: rgba(255, 178, 26, 0.36);
+}
+
+/* SVU marker — blinking core with two staggered expanding rings */
+.svu-ap-marker {
+    cursor: pointer;
+    outline: none;
+}
+.svu-ap-hit {
+    fill: transparent;
+}
+.svu-ap-core {
+    fill: #FFB21A;
+    stroke: #FFF9EE;
+    stroke-width: 2.5;
+    transform-box: fill-box;
+    transform-origin: center;
+    filter: drop-shadow(0 0 8px rgba(255, 178, 26, 0.9));
+    transition: transform 200ms ease;
+}
+.svu-ap-map.is-settled .svu-ap-core {
+    animation: svu-ap-blink 1.1s ease-in-out infinite;
+}
+.svu-ap-marker:hover .svu-ap-core,
+.svu-ap-marker:focus-visible .svu-ap-core {
+    transform: scale(1.35);
+}
+.svu-ap-ping {
+    fill: none;
+    stroke: #FFB21A;
+    stroke-width: 3;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+}
+.svu-ap-map.is-settled .svu-ap-ping {
+    animation: svu-ap-ping 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+.svu-ap-map.is-settled .svu-ap-ping--late {
+    animation-delay: 0.9s;
+}
+
+.svu-ap-label rect {
+    fill: rgba(0, 21, 70, 0.92);
+    stroke: rgba(255, 178, 26, 0.85);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    transition: fill 200ms ease;
+}
+.svu-ap-marker:hover .svu-ap-label rect,
+.svu-ap-marker:focus-visible .svu-ap-label rect {
+    fill: rgba(31, 69, 214, 0.95);
+}
+.svu-ap-label-title {
+    fill: #FFB21A;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 800;
+}
+.svu-ap-label-sub {
+    fill: rgba(255, 233, 194, 0.88);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+@keyframes svu-ap-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+@keyframes svu-ap-ping {
+    0% { transform: scale(1); opacity: 0.95; }
+    100% { transform: scale(3.6); opacity: 0; }
+}
+
+.svu-ap-tip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(0, 21, 70, 0.94);
+    border: 1px solid rgba(255, 178, 26, 0.6);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 140ms ease;
+    will-change: transform;
+}
+.svu-ap-tip.is-on {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-ap-map.is-settled .svu-ap-core,
+    .svu-ap-map.is-settled .svu-ap-ping {
+        animation: none;
+    }
+    .svu-ap-map,
+    .svu-globe-canvas-wrap {
+        transition-duration: 1ms;
+    }
+}
+
+/* =========================================================
+   Footer Heartbeat Animation (Realistic lub-dub cardiac rhythm)
+   ========================================================= */
+@keyframes svuHeartbeat {
+    0% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.32);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.22);
+    }
+    70% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.svu-heartbeat {
+    display: inline-block;
+    animation: svuHeartbeat 1.35s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
+}
+
+/* ==========================================================================
+   Mobile menu (MobileMenu.tsx) — each panel swap replays a short slide-in;
+   rows rise in with a stagger set inline via animation-delay. All
+   transform/opacity, so they run on the compositor.
+   ========================================================================== */
+.svu-menu-panel {
+    animation: svu-menu-panel-in 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.svu-menu-item {
+    animation: svu-menu-item-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Sub-menu dropdown: grid row grows from 0fr to its content height */
+.svu-menu-dropdown {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.svu-menu-dropdown.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+@keyframes svu-menu-panel-in {
+    from { opacity: 0; transform: translate3d(24px, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes svu-menu-item-in {
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svu-menu-panel,
+    .svu-menu-item {
+        animation: none;
+    }
+    .svu-menu-dropdown {
+        transition: none;
+    }
+}

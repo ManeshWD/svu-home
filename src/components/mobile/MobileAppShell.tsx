@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { Bell, ChevronRight, Download, House, Landmark, LayoutGrid, Menu, Share, SquarePlus, WifiOff, X } from "lucide-react";
+import { Bell, ChevronRight, Download, House, Landmark, LayoutGrid, Share, SquarePlus, WifiOff, X } from "lucide-react";
+import MenuToggleIcon, { MenuBarsIcon } from "../MenuToggleIcon";
 import { noticeCategories } from "@/data/notices";
 import { quickServices } from "@/data/services";
 import BottomSheet from "./BottomSheet";
@@ -70,12 +71,12 @@ export default function MobileAppShell() {
   );
   const closeSheet = useCallback(() => switchSheet(null), [switchSheet]);
 
-  const tabs: { key: TabKey; label: string; icon: typeof House; onPress: () => void; badge?: number }[] = [
+  const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; onPress: () => void; badge?: number }[] = [
     { key: "home", label: "Home", icon: House, onPress: () => { switchSheet(null); goToHref("#hero"); } },
     { key: "services", label: "Services", icon: LayoutGrid, onPress: () => switchSheet(sheet === "services" ? null : "services") },
     { key: "alerts", label: "Alerts", icon: Bell, onPress: () => switchSheet(sheet === "alerts" ? null : "alerts"), badge: unread },
     { key: "colleges", label: "Colleges", icon: Landmark, onPress: () => { switchSheet(null); goToHref("#colleges"); } },
-    { key: "menu", label: "Menu", icon: Menu, onPress: () => { switchSheet(null); emitAppEvent(APP_EVENTS.openMenu); } },
+    { key: "menu", label: "Menu", icon: MenuBarsIcon, onPress: () => { switchSheet(null); emitAppEvent(APP_EVENTS.openMenu); } },
   ];
 
   return (
@@ -107,7 +108,7 @@ export default function MobileAppShell() {
       >
         <div className="flex h-14 items-center justify-between px-4">
           <button type="button" onClick={() => goToHref("#hero")} className="flex items-center gap-2.5">
-            <Image src="/svu-color-crest.webp" alt="" width={36} height={36} className="h-9 w-auto object-contain" />
+            <Image src="/svu-color-crest.webp" unoptimized alt="" width={36} height={36} className="h-9 w-auto object-contain" />
             <span className="text-left">
               <span className="block font-serif text-[13px] font-bold uppercase leading-none tracking-tight text-white">
                 Sri Venkateswara
@@ -122,7 +123,7 @@ export default function MobileAppShell() {
               <Bell className="h-5 w-5" />
             </IconButton>
             <IconButton label="Open menu" onClick={() => emitAppEvent(APP_EVENTS.openMenu)}>
-              <Menu className="h-5 w-5" />
+              <MenuToggleIcon open={false} className="h-5 w-5" />
             </IconButton>
           </div>
         </div>
@@ -179,7 +180,7 @@ export default function MobileAppShell() {
           >
             {/* Row 1: crest + title, close top-right */}
             <div className="flex items-center gap-3.5 pr-10">
-              <Image src="/SV-logo.webp" alt="Sri Venkateswara University crest" width={56} height={65} className="h-16 w-auto shrink-0 object-contain" />
+              <Image src="/SV-logo.webp" unoptimized alt="Sri Venkateswara University crest" width={56} height={65} className="h-16 w-auto shrink-0 object-contain" />
               <div className="min-w-0">
                 <p className="font-serif text-[20px] font-bold leading-tight text-[#001546]">Get the SVU app</p>
                 <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#D23F12]">

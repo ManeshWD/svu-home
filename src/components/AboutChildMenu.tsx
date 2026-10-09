@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  X,
   ArrowLeft,
   ArrowUpRight,
   ChevronRight,
@@ -28,6 +27,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import MenuToggleIcon from "./MenuToggleIcon";
 
 interface AboutChildMenuProps {
   onBack: () => void;
@@ -55,24 +55,24 @@ interface MenuEntry {
 // Two columns of About links; entries with `groups` open a second level
 const menuColumns: MenuEntry[][] = [
   [
-    { label: "Overview", href: "#about" },
+    { label: "Overview", href: "/about" },
     {
       label: "Administration",
       groups: [
         {
           title: "Leadership",
           items: [
-            { label: "Vice-Chancellor", href: "#leadership", icon: UserRound },
-            { label: "Rector", href: "#leadership", icon: UserCheck },
-            { label: "Registrar", href: "#leadership", icon: FileSignature },
+            { label: "Vice-Chancellor", href: "/administration/vice-chancellor", icon: UserRound },
+            { label: "Rector", href: "/administration/rector", icon: UserCheck },
+            { label: "Registrar", href: "/administration/registrar", icon: FileSignature },
           ],
         },
         {
           title: "Offices",
           items: [
-            { label: "Examinations", href: "#notifications", icon: ClipboardList },
-            { label: "Academic Affairs", href: "#colleges", icon: BookOpen },
-            { label: "Finance", href: "#contact", icon: Wallet },
+            { label: "Examinations", href: "/#notifications", icon: ClipboardList },
+            { label: "Academic Affairs", href: "/colleges/arts", icon: BookOpen },
+            { label: "Finance", href: "/contact", icon: Wallet },
           ],
         },
       ],
@@ -83,50 +83,50 @@ const menuColumns: MenuEntry[][] = [
         {
           title: "Rankings",
           items: [
-            { label: "NAAC A+", href: "#about", icon: Award },
-            { label: "NIRF Ranking", href: "#about", icon: ChartColumn },
-            { label: "UGC Category-I", href: "#about", icon: BadgeCheck },
+            { label: "NAAC A+", href: "/#about", icon: Award },
+            { label: "NIRF Ranking", href: "/#about", icon: ChartColumn },
+            { label: "UGC Category-I", href: "/#about", icon: BadgeCheck },
           ],
         },
         {
           title: "Quality",
           items: [
-            { label: "IQAC", href: "#about", icon: ShieldCheck },
-            { label: "AQAR Reports", href: "#about", icon: FileText },
+            { label: "IQAC", href: "/#about", icon: ShieldCheck },
+            { label: "AQAR Reports", href: "/#about", icon: FileText },
           ],
         },
       ],
     },
   ],
   [
-    { label: "History", href: "#about" },
+    { label: "History", href: "/about" },
     {
       label: "Campus Life",
       groups: [
         {
           title: "Living",
           items: [
-            { label: "Hostels", href: "#gallery", icon: BedDouble },
-            { label: "Health Centre", href: "#gallery", icon: HeartPulse },
-            { label: "Sports", href: "#gallery", icon: Trophy },
+            { label: "Hostels", href: "/gallery", icon: BedDouble },
+            { label: "Health Centre", href: "/gallery", icon: HeartPulse },
+            { label: "Sports", href: "/gallery", icon: Trophy },
           ],
         },
         {
           title: "Facilities",
           items: [
-            { label: "Library", href: "#centres", icon: Library },
-            { label: "Auditorium", href: "#events", icon: Theater },
-            { label: "Transport", href: "#contact", icon: Bus },
+            { label: "Library", href: "/gallery", icon: Library },
+            { label: "Auditorium", href: "/gallery", icon: Theater },
+            { label: "Transport", href: "/contact", icon: Bus },
           ],
         },
       ],
     },
-    { label: "Contact", href: "#contact" },
+    { label: "Contact", href: "/contact" },
   ],
 ];
 
 const bigLinkClass =
-  "group flex items-center gap-3 font-sans text-3xl sm:text-4xl lg:text-[42px] whitespace-nowrap font-bold tracking-tight text-white hover:text-[#23B5E9] transition-colors leading-none cursor-pointer";
+  "group flex items-center gap-3 font-serif text-3xl sm:text-4xl lg:text-[42px] whitespace-nowrap font-bold tracking-tight text-white hover:text-[#23B5E9] transition-colors leading-none cursor-pointer";
 
 const levelMotion = {
   initial: { opacity: 0, x: 24 },
@@ -137,8 +137,11 @@ const levelMotion = {
 
 export default function AboutChildMenu({ onBack, onClose }: AboutChildMenuProps) {
   const [openEntry, setOpenEntry] = useState<MenuEntry | null>(null);
+  // The close icon morphs back into the hamburger while the menu fades out
+  const [closing, setClosing] = useState(false);
 
   const handleNavClick = () => {
+    setClosing(true);
     if (onClose) onClose();
   };
 
@@ -161,11 +164,11 @@ export default function AboutChildMenu({ onBack, onClose }: AboutChildMenuProps)
         </button>
 
         <button
-          onClick={onClose}
+          onClick={handleNavClick}
           className="p-2.5 rounded-full border border-white/20 bg-white/5 hover:bg-white/15 text-white transition-all cursor-pointer shadow-sm active:scale-95 flex items-center justify-center"
           aria-label="Close menu"
         >
-          <X className="w-5 h-5 text-white" />
+          <MenuToggleIcon open={!closing} className="h-5 w-5 text-white" />
         </button>
       </div>
 
@@ -193,7 +196,7 @@ export default function AboutChildMenu({ onBack, onClose }: AboutChildMenuProps)
               <div className="relative z-10 flex items-center justify-between pt-4 border-t border-white/10">
                 <span className="text-[10px] font-mono text-white/60">Est. 1954 · Tirupati</span>
                 <Link
-                  href="#gallery"
+                  href="/gallery"
                   onClick={handleNavClick}
                   className="w-6 h-6 rounded-full bg-white text-[#001546] flex items-center justify-center shadow-md"
                   aria-label="Explore the campus gallery"
@@ -235,7 +238,7 @@ export default function AboutChildMenu({ onBack, onClose }: AboutChildMenuProps)
                   <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
                   About
                 </button>
-                <h3 className="mt-3 font-sans text-3xl sm:text-4xl lg:text-[42px] whitespace-nowrap font-bold tracking-tight leading-none text-white">
+                <h3 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-[42px] whitespace-nowrap font-bold tracking-tight leading-none text-white">
                   {openEntry.label}
                 </h3>
 
@@ -262,7 +265,7 @@ export default function AboutChildMenu({ onBack, onClose }: AboutChildMenuProps)
                 </div>
               </motion.div>
             ) : (
-              <motion.div key="root" {...levelMotion} className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-6">
+              <motion.div key="root" {...levelMotion} className="grid grid-cols-1 sm:grid-cols-[max-content_max-content] gap-8 sm:gap-x-12">
                 {menuColumns.map((column, ci) => (
                   <div key={ci} className="py-2 lg:border-l lg:border-white/10 lg:pl-8 space-y-4 sm:space-y-5">
                     {column.map((entry) =>

@@ -23,7 +23,7 @@ export default function MobileAppSection() {
 
           {/* Left Column: Headline and App Download Buttons */}
           <div className="lg:col-span-5 flex flex-col justify-center">
-            <h2 className="text-[clamp(1.5rem,3.6vw,2.75rem)] font-black text-black tracking-tight leading-[1.1] font-['Plus_Jakarta_Sans',sans-serif]">
+            <h2 className="text-[clamp(1.5rem,3.6vw,2.75rem)] font-black text-black tracking-tight leading-[1.1] font-[family-name:var(--font-heading)]">
               Take the job<br />
               search with you
             </h2>

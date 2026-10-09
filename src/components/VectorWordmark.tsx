@@ -315,7 +315,7 @@ function OriginkitBaseVectorWordmark(props: VectorWordmarkProps) {
     const {
         text = "VECTOR",
         font = {
-            fontFamily: "Inter",
+            fontFamily: "Lato",
             fontWeight: 800,
             fontSize: "200px",
             lineHeight: "1em",
@@ -341,7 +341,7 @@ function OriginkitBaseVectorWordmark(props: VectorWordmarkProps) {
 
     const rawSize = font?.fontSize
     const fontSpec: FontSpec = {
-        family: (font?.fontFamily as string) || "Inter, system-ui, sans-serif",
+        family: (font?.fontFamily as string) || "Lato, system-ui, sans-serif",
         weight: String(font?.fontWeight ?? 500),
         style: font?.fontStyle === "italic" ? "italic" : "normal",
         size: Math.max(8, parseFloat(String(rawSize ?? 240)) || 240),

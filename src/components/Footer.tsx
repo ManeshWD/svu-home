@@ -8,15 +8,16 @@ import { Heart } from "lucide-react";
 import RotatingGlobe from "@/components/RotatingGlobe";
 import VectorWordmark from "@/components/VectorWordmark";
 import { FanWatermark } from "@/components/FanWatermark";
+import PixelButton from "./PixelButton";
 
 const quickLinks = [
-  { label: "Admissions 2026", href: "#admissions" },
-  { label: "Colleges & Faculties", href: "#colleges" },
-  { label: "Centres & Institutes", href: "#centres" },
-  { label: "Research & Ph.D.", href: "#" },
-  { label: "Campus Placements", href: "#employers" },
-  { label: "Student Life & Hostels", href: "#gallery" },
-  { label: "Contact Administration", href: "#contact" },
+  { label: "Admissions 2026", href: "/#admissions" },
+  { label: "Colleges & Faculties", href: "/colleges/arts" },
+  { label: "Centres & Institutes", href: "/centers" },
+  { label: "Research & Ph.D.", href: "/people/faculty" },
+  { label: "Campus Placements", href: "/#employers" },
+  { label: "Student Life & Hostels", href: "/gallery" },
+  { label: "Contact Administration", href: "/contact" },
 ];
 
 const socialLinks = [
@@ -116,9 +117,9 @@ export default function Footer() {
       {/* ========================================================
           WHERE WE ARE LOCATED: SACRED TIRUPATI FOOTHILLS & 3D GLOBE
          ======================================================== */}
-      <div className="relative pb-12 sm:pb-16 border-b border-white/10">
+      <div className="relative pb-12 sm:pb-16 lg:pb-[calc(64*var(--dk-space))] border-b border-white/10">
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-          <div className="relative grid grid-cols-1 lg:grid-cols-12 items-center min-h-[360px] sm:min-h-[400px] lg:min-h-[420px]">
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 items-center min-h-[360px] sm:min-h-[400px] lg:min-h-[calc(420*var(--dk-ui))]">
             {/* Left Side: Headline, Subtitle, Devotional Touch, CTAs */}
             <div className="z-10 py-6 sm:py-8 lg:col-span-6 lg:pr-6 flex flex-col justify-center">
               <div className="inline-flex items-center gap-2 mb-3">
@@ -128,7 +129,7 @@ export default function Footer() {
                 </span>
               </div>
 
-              <h2 className="font-serif text-[28px] sm:text-[38px] lg:text-[44px] font-bold leading-[1.15] tracking-tight text-white">
+              <h2 className="font-serif text-[28px] sm:text-[38px] lg:text-(length:--dk-h2) lg:text-balance font-bold leading-[1.15] tracking-tight text-white">
                 Nestled in the Sacred Foothills of Tirumala
               </h2>
 
@@ -136,36 +137,42 @@ export default function Footer() {
                 Situated at the sacred foothills of Tirumala in the holy city of Tirupati, our campus thrives under divine inspiration — uniting timeless spiritual serenity with academic pursuit.
               </p>
 
-              {/* Location Badges */}
-              <div className="mt-5 flex flex-wrap items-center gap-2.5 text-xs text-[#FFE9C2]/75 font-mono">
-                <span className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
-                  Alipiri Bypass Road, Tirupati, AP 517502
-                </span>
-                <span className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
-                  Holy Seshachalam Foothills
-                </span>
-              </div>
-
-              <div className="mt-7 flex flex-wrap items-center gap-4">
-                <a
+              <div className="mt-7 lg:mt-[calc(28*var(--dk-space))] flex flex-wrap items-center gap-4">
+                <PixelButton
                   href="https://maps.google.com/?q=Sri+Venkateswara+University+Tirupati"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-[#001546] shadow-md transition-all duration-200 hover:bg-[#FFB21A] hover:text-[#001546] hover:shadow-lg hover:shadow-[#FFB21A]/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="px-6 py-3.5 text-sm font-bold"
+                  background="#FFB21A"
+                  pixelColor="#001546"
+                  fontDefaultColor="#001546"
+                  fontHoverColor="#FFB21A"
+                  pixelSize={14}
+                  staggerStep={0.02}
+                  reveal="random"
                 >
                   Get Directions
-                </a>
-                <Link
-                  href="#about"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-5 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/10 hover:border-white/40 cursor-pointer"
+                </PixelButton>
+                <PixelButton
+                  href="/about"
+                  className="px-6 py-3.5 text-sm font-semibold border border-white/20"
+                  background="#041B55"
+                  pixelColor="#23B5E9"
+                  fontDefaultColor="#FFFFFF"
+                  fontHoverColor="#001546"
+                  pixelSize={14}
+                  staggerStep={0.02}
+                  reveal="random"
                 >
                   Explore Campus
-                </Link>
+                </PixelButton>
               </div>
             </div>
 
             {/* Right Side: Interactive 3D Dotted Rotating Globe */}
-            <div className="relative lg:col-span-6 h-[320px] sm:h-[390px] lg:h-[450px] w-full flex items-center justify-center overflow-hidden">
+            {/* Desktop: taller, and bleeds right out to the footer's edge (the
+                globe sizes to the box's shorter side, so the column alone capped it) */}
+            <div className="relative lg:col-span-6 h-[320px] sm:h-[390px] lg:h-[calc(640*var(--dk-ui))] w-full lg:w-auto lg:-mr-[calc(max(0px,(100vw-80rem)/2)+2.5rem)] flex items-center justify-center overflow-hidden">
               <RotatingGlobe />
             </div>
           </div>
@@ -176,14 +183,14 @@ export default function Footer() {
         {/* ========================================================
             FOOTER BOTTOM CONTENT (Exact Reference Layout)
            ======================================================== */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 pt-2 pb-14 border-b border-white/10">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 pt-2 pb-14 lg:pb-[calc(56*var(--dk-space))] border-b border-white/10">
           {/* Left Column: Brand Logo, Address, Contact Info */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-8">
             <div>
               {/* University crest — the white-scroll version reads on navy */}
               <div className="flex items-center gap-3.5">
                 <Image
-                  src="/svu-logo.webp"
+                  src="/svu-logo.webp" unoptimized
                   alt="Sri Venkateswara University crest"
                   width={1166}
                   height={1349}
@@ -290,14 +297,14 @@ export default function Footer() {
         {/* ========================================================
             SV UNIVERSITY WORDMARK (Originkit Vector Wordmark)
            ======================================================== */}
-        <div className="pt-10 sm:pt-14" aria-hidden="true">
+        <div className="pt-10 sm:pt-14 lg:pt-[calc(56*var(--dk-space))]" aria-hidden="true">
           <VectorWordmark
             text="SV UNIVERSITY"
             font={{
-              fontFamily: "Plus Jakarta Sans",
-              fontWeight: 800,
-              fontSize: "155px",
-              letterSpacing: "-0.02em",
+              fontFamily: "Libre Baskerville",
+              fontWeight: 700,
+              fontSize: "124px",
+              letterSpacing: "-0.01em",
             }}
             background="transparent"
             textColor="#FFB21A"
@@ -310,7 +317,7 @@ export default function Footer() {
         {/* ========================================================
             BOTTOM BAR (Copyright on left, Made with love on right)
            ======================================================== */}
-        <div className="pt-8 pb-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8F9CAE] sm:text-[#FFE9C2]/60 font-medium">
+        <div className="pt-8 lg:pt-[calc(32*var(--dk-space))] pb-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8F9CAE] sm:text-[#FFE9C2]/60 font-medium">
           <p className="text-center sm:text-left">
             &copy; {new Date().getFullYear()} Sri Venkateswara University. All rights reserved.
           </p>
@@ -326,9 +333,9 @@ export default function Footer() {
               href="https://flyingstars.co/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#23B5E9] hover:text-[#FFB21A] font-semibold tracking-wide transition-colors underline-offset-4 hover:underline cursor-pointer"
+              className="text-[#23B5E9] hover:text-[#FFB21A] font-semibold tracking-wide transition-colors cursor-pointer"
             >
-              flyingstars
+              Flyingstars
             </a>
           </div>
         </div>

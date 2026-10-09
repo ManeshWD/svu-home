@@ -211,7 +211,7 @@ export default function Header({ currentPath = "/home2" }: HeaderProps) {
           >
             <div className="relative transition-transform duration-300 group-hover:scale-105">
               <Image
-                src="/SV-logo.webp"
+                src="/SV-logo.webp" unoptimized
                 alt="Sri Venkateswara University Emblem"
                 width={56}
                 height={56}
@@ -287,7 +287,7 @@ export default function Header({ currentPath = "/home2" }: HeaderProps) {
           >
             <div className="relative transition-transform duration-300 group-hover:scale-105">
               <Image
-                src="/SV-logo.webp"
+                src="/SV-logo.webp" unoptimized
                 alt="Sri Venkateswara University Emblem"
                 width={56}
                 height={56}
